@@ -11,14 +11,14 @@ An evergreen dashboard showing **WTI crude oil** and **Henry Hub natural gas** p
   `curve_snapshots.json` over time.
 - A **scheduled GitHub Action** (`.github/workflows/update.yml`) runs the script every
   weekday after market settlement and commits the refreshed data back to the repo.
-- **`dashboard.html`** is served by **GitHub Pages**, reads the JSON, renders with
+- **`index.html`** is served by **GitHub Pages**, reads the JSON, renders with
   Chart.js, and self-reloads hourly. Point the TV browser at the Pages URL.
 
 No always-on PC required.
 
 ## Editing the dashboard
 
-Edit `dashboard.html` and push (or use GitHub's web editor). Pages redeploys within
+Edit `index.html` and push (or use GitHub's web editor). Pages redeploys within
 ~a minute; the TV picks it up on its next hourly reload.
 
 ## EIA API key
