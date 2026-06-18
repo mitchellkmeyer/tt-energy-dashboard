@@ -137,13 +137,28 @@
 
     .ticker {
       display: inline-flex;
-      align-items: baseline;
-      gap: 11px;
+      align-items: center;
+      gap: 13px;
       border: 2px solid var(--live-accent);
       border-radius: 9px;
       padding: 4px 13px;
       font-family: 'Roboto', sans-serif;
       line-height: 1.1;
+    }
+
+    /* Intraday sparkline/area thumbnail, left of the price inside the box */
+    .ticker-spark {
+      width: 70px;
+      height: 36px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .ticker-spark canvas { display: block; }
+
+    .ticker-readout {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 11px;
     }
 
     .ticker-price {
@@ -302,7 +317,8 @@
       /* Title row: let the price ticker wrap under the name if it's tight */
       .chart-title { flex-wrap: wrap; font-size: 1.5rem; gap: 6px 12px; }
       .chart-unit  { font-size: 1.05rem; }
-      .ticker      { padding: 3px 10px; border-radius: 7px; }
+      .ticker      { padding: 3px 10px; border-radius: 7px; gap: 9px; }
+      .ticker-spark  { width: 50px; height: 28px; }
       .ticker-price  { font-size: 1.3rem; }
       .ticker-change { font-size: 0.95rem; }
       .ticker-asof   { font-size: 0.8rem; }
@@ -382,8 +398,11 @@
       </span>
       <span class="ticker-wrap">
         <span class="ticker empty" id="wti-ticker">
-          <span class="ticker-price" id="wti-price">—</span>
-          <span class="ticker-change flat" id="wti-change"></span>
+          <span class="ticker-spark" id="wti-spark-wrap"><canvas id="wti-spark"></canvas></span>
+          <span class="ticker-readout">
+            <span class="ticker-price" id="wti-price">—</span>
+            <span class="ticker-change flat" id="wti-change"></span>
+          </span>
         </span>
         <span class="ticker-asof" id="wti-asof"></span>
       </span>
@@ -398,8 +417,11 @@
       </span>
       <span class="ticker-wrap">
         <span class="ticker empty" id="hh-ticker">
-          <span class="ticker-price" id="hh-price">—</span>
-          <span class="ticker-change flat" id="hh-change"></span>
+          <span class="ticker-spark" id="hh-spark-wrap"><canvas id="hh-spark"></canvas></span>
+          <span class="ticker-readout">
+            <span class="ticker-price" id="hh-price">—</span>
+            <span class="ticker-change flat" id="hh-change"></span>
+          </span>
         </span>
         <span class="ticker-asof" id="hh-asof"></span>
       </span>
@@ -660,6 +682,61 @@ function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
 const LIVE_COLOR = '#D1A45A';   // warm gold
 const DOT_RING   = '#262423';   // background brown — rings the dot off busy lines
 let wtiChart = null, hhChart = null;
+let wtiSpark = null, hhSpark = null;
+
+// Intraday sparkline fill/line colors (reuse the up/down palette)
+const SPARK_UP_FILL = 'rgba(91,191,106,0.30)', SPARK_DN_FILL = 'rgba(224,104,91,0.34)';
+const SPARK_UP_LINE = 'rgba(91,191,106,0.95)', SPARK_DN_LINE = 'rgba(224,104,91,0.95)';
+
+// Draw (or redraw) the intraday area thumbnail inside a ticker box: shaded green
+// above yesterday's close, red below, with a dashed reference line at prev_close.
+function renderSpark(key, series, prevClose) {
+  const wrap = document.getElementById(`${key}-spark-wrap`);
+  const old  = key === 'wti' ? wtiSpark : hhSpark;
+  if (old) { old.destroy(); }
+  if (key === 'wti') wtiSpark = null; else hhSpark = null;
+
+  if (!series || series.length < 2 || prevClose == null) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = '';
+
+  const labels = series.map((_, i) => i);
+  const lo  = Math.min(prevClose, ...series);
+  const hi  = Math.max(prevClose, ...series);
+  const pad = (hi - lo) * 0.18 || Math.abs(prevClose) * 0.01 || 0.01;
+
+  const chart = new Chart(document.getElementById(`${key}-spark`).getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { // dashed reference at prev_close (the green/red boundary)
+          data: labels.map(() => prevClose),
+          borderColor: 'rgba(214,210,205,0.45)', borderDash: [3, 3],
+          borderWidth: 1, pointRadius: 0, fill: false, tension: 0, order: 1,
+        },
+        { // intraday price, filled toward the reference value
+          data: series, borderWidth: 1.6, pointRadius: 0, tension: 0.25, order: 0,
+          fill: { target: { value: prevClose }, above: SPARK_UP_FILL, below: SPARK_DN_FILL },
+          segment: {
+            borderColor: c =>
+              (c.p0.parsed.y + c.p1.parsed.y) / 2 >= prevClose ? SPARK_UP_LINE : SPARK_DN_LINE,
+          },
+        },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      layout: { padding: 0 },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: { x: { display: false }, y: { display: false, min: lo - pad, max: hi + pad } },
+      elements: { line: { borderJoinStyle: 'round', borderCapStyle: 'round' } },
+    },
+  });
+  if (key === 'wti') wtiSpark = chart; else hhSpark = chart;
+}
 
 // Per-commodity display formatting for the live quote
 const LIVE_FMT = {
@@ -698,10 +775,19 @@ function updateTicker(key, q) {
   const asofEl   = document.getElementById(`${key}-asof`);
   const fmt = LIVE_FMT[key];
 
-  if (!q) { box.classList.add('empty'); changeEl.textContent = ''; asofEl.textContent = ''; return; }
+  if (!q) {
+    box.classList.add('empty'); changeEl.textContent = ''; asofEl.textContent = '';
+    renderSpark(key, null, null);
+    return;
+  }
 
   box.classList.remove('empty');
   priceEl.textContent = fmt.price(q.price);
+
+  // End the intraday line on the current headline price so they agree visually.
+  const spark = (q.spark || []).slice();
+  if (q.price != null) spark.push(q.price);
+  renderSpark(key, spark, q.prev_close);
 
   const dir   = q.change > 0 ? 'up' : q.change < 0 ? 'down' : 'flat';
   const arrow = q.change > 0 ? '▲' : q.change < 0 ? '▼' : '▬';
