@@ -494,6 +494,31 @@ const CURVE_LABELS = {
   '1yr':   '1 Year Ago',
 };
 
+// ── "TODAY" vertical separator plugin (main price charts only) ────────────────
+const todayLinePlugin = {
+  id: 'todayLine',
+  afterDraw(chart) {
+    if (!chart.canvas.id.endsWith('-chart')) return;   // main price charts only, not sparklines
+    const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+    const px = x.getPixelForValue(TODAY);
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(px, top);
+    ctx.lineTo(px, bottom);
+    ctx.strokeStyle = 'rgba(254,252,250,0.18)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(254,252,250,0.35)';
+    ctx.font = '500 18px Roboto, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('TODAY', px, top + 16);
+    ctx.restore();
+  },
+};
+Chart.register(todayLinePlugin);
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getSpotAtDate(spotHistory, dateStr) {
   const target = new Date(dateStr + 'T12:00:00').getTime();
