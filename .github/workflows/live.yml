@@ -2,9 +2,12 @@ name: Update live prices
 
 on:
   schedule:
-    # Every ~15 min, 13:00–22:59 UTC on weekdays (≈8am–6pm Central) — through the
-    # trading day. GitHub schedules are best-effort, so effective cadence is looser.
-    - cron: '*/15 13-22 * * 1-5'
+    # ~Every 15 min, 13:00–22:59 UTC on weekdays (≈8am–6pm Central) — through the
+    # trading day. Minutes are offset (3/18/33/48, not :00/:15/:30/:45) because
+    # GitHub heavily deprioritizes and often DROPS scheduled runs at the top-of-hour
+    # marks; off-peak minutes fire far more reliably. Schedules are still best-effort,
+    # so effective cadence is looser than 15 min and occasional gaps are normal.
+    - cron: '3,18,33,48 13-22 * * 1-5'
   workflow_dispatch:        # manual run from the Actions tab
 
 permissions:
