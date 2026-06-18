@@ -11,8 +11,13 @@ An evergreen dashboard showing **WTI crude oil** and **Henry Hub natural gas** p
   `curve_snapshots.json` over time.
 - A **scheduled GitHub Action** (`.github/workflows/update.yml`) runs the script every
   weekday after market settlement and commits the refreshed data back to the repo.
+- **`update_live.py`** fetches the current front-month price for each commodity
+  (WTI `CL=F`, Henry Hub `NG=F`) from Yahoo Finance and writes `live.json`. A second
+  Action (`.github/workflows/live.yml`) runs it every ~15 min through the trading day,
+  feeding the gold live-price ticker + dot on each chart.
 - **`index.html`** is served by **GitHub Pages**, reads the JSON, renders with
-  Chart.js, and self-reloads hourly. Point the TV browser at the Pages URL.
+  Chart.js, self-reloads hourly, and polls `live.json` every few minutes for the live
+  prices. Point the TV browser at the Pages URL.
 
 No always-on PC required.
 

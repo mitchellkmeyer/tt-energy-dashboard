@@ -12,6 +12,9 @@
     :root {
       --dark-brown: #262423;
       --ivory:      #FEFCFA;
+      --live-accent: #D1A45A;  /* warm gold — live element (contrast vs. green/white) */
+      --up:         #5BBF6A;   /* gain */
+      --down:       #E0685B;   /* loss */
       --panel-bg:   rgba(255,255,255,0.035);
       --muted:      rgba(254,252,250,0.45);
     }
@@ -105,7 +108,15 @@
       margin-bottom: 8px;
       display: flex;
       align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .chart-title-left {
+      display: flex;
+      align-items: baseline;
       gap: 10px;
+      min-width: 0;
     }
 
     .chart-unit {
@@ -114,6 +125,53 @@
       font-size: 1.62rem;
       color: var(--muted);
     }
+
+    /* ── Live price ticker (amber accent) ────────────────────────────────────── */
+    .ticker-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .ticker {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 11px;
+      border: 2px solid var(--live-accent);
+      border-radius: 9px;
+      padding: 4px 13px;
+      font-family: 'Roboto', sans-serif;
+      line-height: 1.1;
+    }
+
+    .ticker-price {
+      font-size: 1.72rem;
+      font-weight: 500;
+      color: var(--ivory);
+      letter-spacing: 0.01em;
+    }
+
+    .ticker-change {
+      font-size: 1.18rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .ticker-change.up   { color: var(--up); }
+    .ticker-change.down { color: var(--down); }
+    .ticker-change.flat { color: var(--muted); }
+
+    .ticker-asof {
+      font-size: 0.92rem;
+      font-weight: 400;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      padding-right: 4px;
+    }
+
+    .ticker.empty { opacity: 0; }   /* hide box until first quote loads */
 
     .canvas-wrap {
       flex: 1;
@@ -163,6 +221,39 @@
       flex-shrink: 0;
       order: 0;
       height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 4px;
+    }
+
+    .clock {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .clock-date {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;     /* right-align the two lines against the bar */
+      line-height: 1.25;
+      font-size: 1.1rem;
+    }
+
+    .clock-divider {
+      width: 1px;
+      align-self: stretch;       /* span the full height of the clock block */
+      background: var(--muted);
+      opacity: 0.55;
+    }
+
+    .clock-time {
+      font-size: 2.2rem;
+      font-weight: 400;
     }
 
     /* ── Status overlay ──────────────────────────────────────────────────── */
@@ -184,7 +275,16 @@
 </head>
 <body>
 
-<div class="top-bar"></div>
+<div class="top-bar">
+  <div class="clock">
+    <div class="clock-date">
+      <span id="clock-day">—</span>
+      <span id="clock-ymd">—</span>
+    </div>
+    <div class="clock-divider"></div>
+    <span class="clock-time" id="clock-time">—</span>
+  </div>
+</div>
 <div id="status">Loading energy data…</div>
 <div id="data-sources">Spot prices: EIA API v2 &nbsp;·&nbsp; Futures: Yahoo Finance / NYMEX</div>
 
@@ -213,7 +313,7 @@
   </div>
 
   <div class="header-meta">
-    Updated<br>
+    Futures Updated<br>
     <span id="updated-time">—</span>
   </div>
 </header>
@@ -222,15 +322,33 @@
 <div class="charts">
   <div class="chart-panel">
     <div class="chart-title">
-      WTI Crude Oil
-      <span class="chart-unit">$/bbl</span>
+      <span class="chart-title-left">
+        WTI Crude Oil
+        <span class="chart-unit">$/bbl</span>
+      </span>
+      <span class="ticker-wrap">
+        <span class="ticker empty" id="wti-ticker">
+          <span class="ticker-price" id="wti-price">—</span>
+          <span class="ticker-change flat" id="wti-change"></span>
+        </span>
+        <span class="ticker-asof" id="wti-asof"></span>
+      </span>
     </div>
     <div class="canvas-wrap"><canvas id="wti-chart"></canvas></div>
   </div>
   <div class="chart-panel">
     <div class="chart-title">
-      Henry Hub Natural Gas
-      <span class="chart-unit">$/MMBtu</span>
+      <span class="chart-title-left">
+        Henry Hub Natural Gas
+        <span class="chart-unit">$/MMBtu</span>
+      </span>
+      <span class="ticker-wrap">
+        <span class="ticker empty" id="hh-ticker">
+          <span class="ticker-price" id="hh-price">—</span>
+          <span class="ticker-change flat" id="hh-change"></span>
+        </span>
+        <span class="ticker-asof" id="hh-asof"></span>
+      </span>
     </div>
     <div class="canvas-wrap"><canvas id="hh-chart"></canvas></div>
   </div>
@@ -484,6 +602,79 @@ function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
   });
 }
 
+// ── Live price ticker + amber dot ─────────────────────────────────────────────
+const LIVE_COLOR = '#D1A45A';   // warm gold
+const DOT_RING   = '#262423';   // background brown — rings the dot off busy lines
+let wtiChart = null, hhChart = null;
+
+// Per-commodity display formatting for the live quote
+const LIVE_FMT = {
+  wti: { price: p => `$${p.toFixed(2)}`, dec: 2 },
+  hh:  { price: p => `$${p.toFixed(3)}`, dec: 3 },
+};
+
+function liveDotDataset() {
+  return {
+    label: 'Live',
+    data: [],
+    borderColor: LIVE_COLOR,
+    backgroundColor: LIVE_COLOR,
+    pointBackgroundColor: LIVE_COLOR,
+    pointBorderColor: DOT_RING,   // brown ring separates the dot from underlying lines
+    pointBorderWidth: 2,
+    pointRadius: 7,
+    pointHoverRadius: 8,
+    showLine: false,
+    order: -1,            // negative → drawn last → sits on top of every curve
+  };
+}
+
+function updateDot(chart, price) {
+  if (!chart) return;
+  const ds = chart.data.datasets.find(d => d.label === 'Live');
+  if (!ds) return;
+  ds.data = (price == null) ? [] : [{ x: TODAY, y: price }];
+  chart.update('none');
+}
+
+function updateTicker(key, q) {
+  const box      = document.getElementById(`${key}-ticker`);
+  const priceEl  = document.getElementById(`${key}-price`);
+  const changeEl = document.getElementById(`${key}-change`);
+  const asofEl   = document.getElementById(`${key}-asof`);
+  const fmt = LIVE_FMT[key];
+
+  if (!q) { box.classList.add('empty'); changeEl.textContent = ''; asofEl.textContent = ''; return; }
+
+  box.classList.remove('empty');
+  priceEl.textContent = fmt.price(q.price);
+
+  const dir   = q.change > 0 ? 'up' : q.change < 0 ? 'down' : 'flat';
+  const arrow = q.change > 0 ? '▲' : q.change < 0 ? '▼' : '▬';
+  changeEl.className = `ticker-change ${dir}`;
+  changeEl.textContent =
+    `${arrow} ${Math.abs(q.change).toFixed(fmt.dec)} (${Math.abs(q.pct).toFixed(2)}%)`;
+
+  const t = new Date(q.market_time);
+  asofEl.textContent = 'as of ' +
+    t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+function applyLive(live) {
+  updateTicker('wti', live.wti);
+  updateTicker('hh',  live.hh);
+  updateDot(wtiChart, live.wti ? live.wti.price : null);
+  updateDot(hhChart,  live.hh  ? live.hh.price  : null);
+}
+
+async function loadLive() {
+  try {
+    const r = await fetch('live.json?' + Date.now());
+    if (!r.ok) return;
+    applyLive(await r.json());
+  } catch (_) { /* keep last shown values on a hiccup */ }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   try {
@@ -496,10 +687,17 @@ async function init() {
       dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
       dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-    createChart('wti-chart', buildDatasets(data.wti), v => `$${Math.round(v)}`);
-    createChart('hh-chart',  buildDatasets(data.hh),  v => `$${v.toFixed(2)}`, { yMax: 8 });
+    const wtiData = [liveDotDataset(), ...buildDatasets(data.wti)];
+    const hhData  = [liveDotDataset(), ...buildDatasets(data.hh)];
+    wtiChart = createChart('wti-chart', wtiData, v => `$${Math.round(v)}`);
+    hhChart  = createChart('hh-chart',  hhData,  v => `$${v.toFixed(2)}`, { yMax: 8 });
 
     document.getElementById('status').style.display = 'none';
+
+    // Live front-month prices: load now, then poll periodically (independent of
+    // the hourly full reload). The live.yml Action refreshes live.json server-side.
+    loadLive();
+    setInterval(loadLive, 3 * 60 * 1000);
 
   } catch (err) {
     const el = document.getElementById('status');
@@ -509,6 +707,19 @@ async function init() {
       `<small style="opacity:.6">${err.message}</small>`;
   }
 }
+
+// ── Live clock (top-right) ────────────────────────────────────────────────────
+function tickClock() {
+  const now = new Date();
+  const day  = document.getElementById('clock-day');
+  const ymd  = document.getElementById('clock-ymd');
+  const time = document.getElementById('clock-time');
+  if (day)  day.textContent  = now.toLocaleDateString('en-US', { weekday: 'long' });
+  if (ymd)  ymd.textContent  = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  if (time) time.textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+tickClock();
+setInterval(tickClock, 1000);
 
 setTimeout(() => location.reload(), 60 * 60 * 1000);
 
