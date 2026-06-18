@@ -383,7 +383,7 @@
   </div>
 
   <div class="header-meta">
-    Futures Updated<br>
+    Futures last updated:<br>
     <span id="updated-time">—</span>
   </div>
 </header>
@@ -493,30 +493,6 @@ const CURVE_LABELS = {
   '3mo':   '3 Months Ago',
   '1yr':   '1 Year Ago',
 };
-
-// ── "TODAY" vertical separator plugin ────────────────────────────────────────
-const todayLinePlugin = {
-  id: 'todayLine',
-  afterDraw(chart) {
-    const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
-    const px = x.getPixelForValue(TODAY);
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(px, top);
-    ctx.lineTo(px, bottom);
-    ctx.strokeStyle = 'rgba(254,252,250,0.18)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = 'rgba(254,252,250,0.35)';
-    ctx.font = '500 18px Roboto, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('TODAY', px, top + 16);
-    ctx.restore();
-  },
-};
-Chart.register(todayLinePlugin);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getSpotAtDate(spotHistory, dateStr) {
@@ -712,13 +688,8 @@ function renderSpark(key, series, prevClose) {
     data: {
       labels,
       datasets: [
-        { // dashed reference at prev_close (the green/red boundary)
-          data: labels.map(() => prevClose),
-          borderColor: 'rgba(214,210,205,0.45)', borderDash: [3, 3],
-          borderWidth: 1, pointRadius: 0, fill: false, tension: 0, order: 1,
-        },
-        { // intraday price, filled toward the reference value
-          data: series, borderWidth: 1.6, pointRadius: 0, tension: 0.25, order: 0,
+        { // intraday price, filled green/red toward yesterday's close
+          data: series, borderWidth: 1.6, pointRadius: 0, tension: 0.25,
           fill: { target: { value: prevClose }, above: SPARK_UP_FILL, below: SPARK_DN_FILL },
           segment: {
             borderColor: c =>
