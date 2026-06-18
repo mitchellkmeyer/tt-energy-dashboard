@@ -271,6 +271,60 @@
       text-align: center;
       padding: 40px;
     }
+
+    /* ── Mobile / narrow screens ─────────────────────────────────────────────── */
+    /* Only applies below 820px — the TV's wide landscape layout is untouched. */
+    @media (max-width: 820px) {
+      html, body { height: auto; }
+      html { overflow-x: hidden; overflow-y: auto; }   /* the page scroller */
+      body {
+        overflow: visible;
+        padding: 10px 14px 22px;
+        gap: 14px;
+      }
+
+      /* Stack the charts vertically; each gets its own height and the page scrolls */
+      .charts {
+        flex-direction: column;
+        flex: initial;
+        gap: 18px;
+      }
+      .chart-panel {
+        flex: initial;
+        padding: 12px 14px 10px;
+      }
+      .canvas-wrap {
+        flex: initial;
+        height: 56vh;
+        min-height: 300px;
+      }
+
+      /* Title row: let the price ticker wrap under the name if it's tight */
+      .chart-title { flex-wrap: wrap; font-size: 1.5rem; gap: 6px 12px; }
+      .chart-unit  { font-size: 1.05rem; }
+      .ticker      { padding: 3px 10px; border-radius: 7px; }
+      .ticker-price  { font-size: 1.3rem; }
+      .ticker-change { font-size: 0.95rem; }
+      .ticker-asof   { font-size: 0.8rem; }
+
+      /* Top-bar clock */
+      .top-bar    { height: auto; padding: 2px 2px 0; }
+      .clock      { gap: 10px; }
+      .clock-date { font-size: 0.92rem; }
+      .clock-time { font-size: 1.55rem; }
+
+      /* Legend wraps onto multiple rows */
+      .legend      { flex-wrap: wrap; gap: 9px 18px; padding: 2px 0; }
+      .legend-item { font-size: 0.95rem; }
+
+      /* Bottom header (logo + futures-updated) */
+      header        { padding: 8px 0; }
+      .logo-wrap svg { height: 26px; }
+      .header-meta  { font-size: 1rem; min-width: 0; line-height: 1.4; }
+
+      #status        { font-size: 1.4rem; padding: 30px; }
+      #data-sources  { font-size: 0.6rem; bottom: 4px; right: 8px; }
+    }
   </style>
 </head>
 <body>
