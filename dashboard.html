@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strip — TT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Roboto+Slab:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <style>
+    :root {
+      --dark-brown: #262423;
+      --ivory:      #FEFCFA;
+      --panel-bg:   rgba(255,255,255,0.035);
+      --muted:      rgba(254,252,250,0.45);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--dark-brown);
+      color: var(--ivory);
+      font-family: 'Roboto', sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 18px 24px 14px;
+      gap: 12px;
+    }
+
+    /* ── Header ──────────────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      gap: 16px;
+      padding: 11px 0;
+      order: 3;
+    }
+
+    .logo-wrap svg {
+      height: 34px;
+      width: auto;
+      display: block;
+    }
+
+    .header-center { display: none; }
+
+    .header-center h1 {
+      font-family: 'Roboto Slab', serif;
+      font-weight: 600;
+      font-size: 2.52rem;
+      letter-spacing: 0.06em;
+      color: var(--ivory);
+      text-transform: uppercase;
+    }
+
+    .header-center .subtitle {
+      font-size: 1.53rem;
+      color: var(--muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .header-meta {
+      text-align: right;
+      font-size: 1.22rem;
+      color: var(--muted);
+      line-height: 1.6;
+      min-width: 130px;
+    }
+
+    /* ── Charts ──────────────────────────────────────────────────────────── */
+    .charts {
+      display: flex;
+      flex: 1;
+      gap: 16px;
+      min-height: 0;
+    }
+
+    .chart-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--panel-bg);
+      border-radius: 10px;
+      padding: 16px 20px 12px;
+      min-height: 0;
+    }
+
+    .chart-title {
+      font-family: 'Roboto Slab', serif;
+      font-size: 2.34rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--ivory);
+      flex-shrink: 0;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .chart-unit {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 1.62rem;
+      color: var(--muted);
+    }
+
+    .canvas-wrap {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+    }
+
+    /* ── Legend ──────────────────────────────────────────────────────────── */
+    .legend {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 36px;
+      flex-shrink: 0;
+      padding: 4px 0 2px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 1.33rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .legend-swatch {
+      width: 30px;
+      height: 3px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ── Data source tag ─────────────────────────────────────────────────── */
+    #data-sources {
+      position: fixed;
+      bottom: 8px;
+      right: 14px;
+      font-size: 0.7rem;
+      color: rgba(254,252,250,0.22);
+      letter-spacing: 0.04em;
+      pointer-events: none;
+    }
+
+    /* ── Top spacer bar ──────────────────────────────────────────────────── */
+    .top-bar {
+      flex-shrink: 0;
+      order: 0;
+      height: 56px;
+    }
+
+    /* ── Status overlay ──────────────────────────────────────────────────── */
+    #status {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--dark-brown);
+      font-family: 'Roboto Slab', serif;
+      font-size: 2.07rem;
+      color: var(--muted);
+      z-index: 100;
+      text-align: center;
+      padding: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+<div id="status">Loading energy data…</div>
+<div id="data-sources">Spot prices: EIA API v2 &nbsp;·&nbsp; Futures: Yahoo Finance / NYMEX</div>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 698.9 84.67">
+      <defs><style>.tt{fill:#FEFCFA}</style></defs>
+      <rect class="tt" x="271.57" y="14.37" width="13.36" height="58.87"/>
+      <path class="tt" d="m336.3,45.32c0,1.75-2.33,2.4-3.25.9l-18.56-30.19c-.64-1.03-1.77-1.67-2.99-1.67h-7.89c-1.94,0-3.5,1.55-3.5,3.47v55.4h13.36v-30.95c0-1.75,2.33-2.4,3.25-.9l18.56,30.19c.64,1.03,1.77,1.67,2.99,1.67h7.89c1.94,0,3.5-1.55,3.5-3.47V14.37h-13.36v30.95Z"/>
+      <path class="tt" d="m237.11,50.81c-.45,1.74-2.95,1.74-3.4,0l-7.29-28.34-2.08-8.11h-9.2l-2.07,8.07-7.29,28.36c-.45,1.74-2.95,1.74-3.4,0-3.12-12.14-6.24-24.29-9.37-36.43h-13.36l14.46,56.26c.4,1.54,1.79,2.61,3.4,2.61h10.64s2.5,0,2.5,0c1.6,0,3-1.08,3.4-2.61l5.71-22.19,5.71,22.19c.4,1.54,1.79,2.61,3.4,2.61h2.5s10.64,0,10.64,0c1.6,0,3-1.08,3.4-2.61l14.46-56.26h-13.36l-9.37,36.44Z"/>
+      <path class="tt" d="m164.86,14.31h-36.49c-1.59,0-2.99,1.06-3.39,2.59l-2.82,10.65h14.26c1.94,0,3.51,1.55,3.51,3.47v42.23h13.37V31.02c0-1.92,1.57-3.47,3.5-3.47h14.26l-2.82-10.65c-.4-1.53-1.8-2.59-3.39-2.59"/>
+      <path class="tt" d="m436.17,14.35h-36.49c-1.59,0-2.99,1.06-3.39,2.59l-2.82,10.65h14.26c1.94,0,3.5,1.55,3.5,3.47v42.22h13.37V31.06c0-1.92,1.57-3.47,3.5-3.47h14.26l-2.82-10.65c-.4-1.53-1.8-2.59-3.39-2.59"/>
+      <rect class="tt" x="580.52" y="14.38" width="13.36" height="58.87"/>
+      <path class="tt" d="m488.04,33.89c0,4.49-3.71,8.16-8.24,8.16h-11.09c-.96,0-1.75-.78-1.75-1.74v-12.84c0-.95.79-1.74,1.75-1.74h11.09c4.53,0,8.24,3.67,8.24,8.16Zm12.04,10.1c.84-.65,1.33-1.65,1.33-2.71v-14.8c0-1.08-.51-2.08-1.35-2.72l-11.06-8.63c-.63-.49-1.38-.75-2.17-.75l-19.87.02v-.02h-9.87c-1.94,0-3.51,1.55-3.51,3.47v55.4h13.37v-16.27c0-1.99,1.63-3.6,3.63-3.6h4.79c1.29,0,2.49.68,3.14,1.79l10.59,18.08h13.37l-12.51-21.36,10.12-7.9Z"/>
+      <path class="tt" d="m546.2,53.4h-10.53c-1.21,0-2.05-1.2-1.65-2.33l5.27-14.37c.56-1.53,2.73-1.53,3.29,0l5.26,14.37c.42,1.13-.44,2.33-1.65,2.33m6.25-26.25l-3.8-10.49c-.07-.16-.13-.31-.21-.45v-.03s-.01-.02-.03-.02c-.31-.55-.75-.99-1.28-1.3-.53-.31-1.14-.49-1.79-.49h-8.78c-1.47,0-2.77.92-3.28,2.27l-.02.02-4.14,11.28h0s-16.6,45.34-16.6,45.34h13.35l2.72-7.39c.25-.69.91-1.15,1.65-1.15h21.36c.74,0,1.38.45,1.65,1.15l2.72,7.39h13.35l-16.6-45.33-.29-.79Z"/>
+      <path class="tt" d="m621.94,14.35h-13.36v58.87h13.36s23.53,0,23.53,0l-1.86-8.59c-.35-1.6-1.78-2.74-3.43-2.74h-18.24V14.35Z"/>
+      <path class="tt" d="m697.03,47.86l-10.86-5.67h-.04l-17.86-9.27c-1.09-.57-1.94-1.58-2.11-2.79-.33-2.27,1.44-4.22,3.67-4.22l28.48-.23-1.97-8.62c-.36-1.58-1.78-2.71-3.42-2.71l-25.59.23c-.78,0-1.54.26-2.16.74-3.69,2.87-7.38,5.73-11.07,8.6-.85.66-1.34,1.66-1.34,2.73v10c0,1.29.72,2.47,1.87,3.07l10.86,5.67h.04l17.86,9.27c1.09.57,1.94,1.58,2.11,2.79.33,2.27-1.44,4.22-3.67,4.22l-28.58.28,1.96,8.6c.36,1.59,1.8,2.72,3.45,2.71l25.67-.25c.77,0,1.52-.27,2.13-.74,3.69-2.87,7.39-5.74,11.08-8.61.85-.66,1.34-1.67,1.34-2.73v-10c0-1.29-.72-2.47-1.87-3.07"/>
+      <path class="tt" d="m83.51,10.14h0s0,0,0,0l-3.63-8.21c-.17-.35-.37-.65-.63-.91-.59-.63-1.43-1-2.33-1h-27.74c-1.37-.01-2.68.54-3.64,1.52l-3.78,3.87-3.78-3.87c-.96-.98-2.27-1.53-3.64-1.53H6.6c-.07,0-.14.01-.19.03-.83.05-1.6.4-2.14.98-.26.26-.46.56-.63.91L0,10.14s0,0,0,0h0s24.64.05,24.64.05h2.23s.01,0,.02,0h.63c.23,0,.45.01.66.05,2.48.33,4.39,2.46,4.39,5.02,0,.15,0,.29,0,.42,0,.06,0,.12-.02.18,0,.11-.02.23-.04.35-.04.21-.11.42-.17.62-.02.07-.04.13-.07.2-.17.4-.43.78-.62,1.17-.34.66-.64,1.34-.94,2.02h.01c-1.88,4.36-2.87,9.09-2.87,13.93v25.1c0,4.51,1.17,8.73,3.24,12.39,2.41,4.3,6.04,7.82,10.42,10.09h0c1.74.89,4.23,1.92,7.37,2.49,2.69.49,5.03.5,6.8.37v-10.14h-2.49c-.49,0-1.24-.02-2.15-.16-5.58-.85-10-5.03-11.69-8.77-.87-1.92-1.36-4.04-1.36-6.29v-25.1c0-4.73,1.34-9.33,3.78-13.29,2.46,3.97,3.77,8.55,3.77,13.29v29.44h10.14v-29.45c0-5.59-1.32-11.04-3.8-15.94-.19-.39-.45-.77-.62-1.17-.03-.07-.05-.13-.07-.2-.07-.2-.13-.4-.17-.62-.02-.12-.04-.24-.05-.35,0-.06-.01-.11-.02-.17,0-.14,0-.27,0-.42,0-2.57,1.92-4.7,4.39-5.02.21-.03.44-.05.66-.05h.63s.01,0,.02,0h2.23s24.64-.05,24.64-.05h0Z"/>
+    </svg>
+  </div>
+
+  <div class="header-center">
+    <h1 id="page-title">Strip</h1>
+    <div class="subtitle">WTI Crude Oil &amp; Henry Hub Natural Gas</div>
+  </div>
+
+  <div class="header-meta">
+    Updated<br>
+    <span id="updated-time">—</span>
+  </div>
+</header>
+
+<!-- ── Charts ──────────────────────────────────────────────────────────────── -->
+<div class="charts">
+  <div class="chart-panel">
+    <div class="chart-title">
+      WTI Crude Oil
+      <span class="chart-unit">$/bbl</span>
+    </div>
+    <div class="canvas-wrap"><canvas id="wti-chart"></canvas></div>
+  </div>
+  <div class="chart-panel">
+    <div class="chart-title">
+      Henry Hub Natural Gas
+      <span class="chart-unit">$/MMBtu</span>
+    </div>
+    <div class="canvas-wrap"><canvas id="hh-chart"></canvas></div>
+  </div>
+</div>
+
+<!-- ── Legend ─────────────────────────────────────────────────────────────── -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:rgba(254,252,250,0.4);height:1.5px;"></div>
+    Historical Spot
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#FEFCFA;"></div>
+    <span id="legend-today-label">Today</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#92CC9A;"></div>
+    Yesterday
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#7EBF87;"></div>
+    7 Days Ago
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#5EA068;"></div>
+    1 Month Ago
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#488252;"></div>
+    3 Months Ago
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#3D6644;"></div>
+    1 Year Ago
+  </div>
+</div>
+
+<script>
+// ── Date setup ────────────────────────────────────────────────────────────────
+const TODAY = new Date();
+TODAY.setHours(0, 0, 0, 0);
+
+const todayFmt = `${TODAY.getMonth() + 1}/${TODAY.getDate()}/${TODAY.getFullYear()}`;
+
+// Dynamic page title and today legend label
+const titleEl = document.getElementById('page-title');
+if (titleEl) titleEl.textContent = `${todayFmt} Strip`;
+document.title = `${todayFmt} Strip — TT`;
+document.getElementById('legend-today-label').textContent = `Today (${todayFmt})`;
+
+// ── Ombre green curve styles (all same width, all solid) ──────────────────────
+const CURVE_STYLES = {
+  'today': { color: '#FEFCFA', width: 2.5, dash: [] },  // ivory (brand)
+  '1d':    { color: '#92CC9A', width: 2.5, dash: [] },
+  '7d':    { color: '#7EBF87', width: 2.5, dash: [] },
+  '1mo':   { color: '#5EA068', width: 2.5, dash: [] },
+  '3mo':   { color: '#488252', width: 2.5, dash: [] },
+  '1yr':   { color: '#3D6644', width: 2.5, dash: [] },  // darkest
+};
+
+const CURVE_LABELS = {
+  'today': `Today (${todayFmt})`,
+  '1d':    'Yesterday',
+  '7d':    '7 Days Ago',
+  '1mo':   '1 Month Ago',
+  '3mo':   '3 Months Ago',
+  '1yr':   '1 Year Ago',
+};
+
+// ── "TODAY" vertical separator plugin ────────────────────────────────────────
+const todayLinePlugin = {
+  id: 'todayLine',
+  afterDraw(chart) {
+    const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+    const px = x.getPixelForValue(TODAY);
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(px, top);
+    ctx.lineTo(px, bottom);
+    ctx.strokeStyle = 'rgba(254,252,250,0.18)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(254,252,250,0.35)';
+    ctx.font = '500 18px Roboto, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('TODAY', px, top + 16);
+    ctx.restore();
+  },
+};
+Chart.register(todayLinePlugin);
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function getSpotAtDate(spotHistory, dateStr) {
+  const target = new Date(dateStr + 'T12:00:00').getTime();
+  let best = null, bestDiff = Infinity;
+  for (const p of spotHistory) {
+    const diff = Math.abs(new Date(p.date + 'T12:00:00').getTime() - target);
+    if (diff < bestDiff) { bestDiff = diff; best = p.price; }
+  }
+  return best;
+}
+
+// ── Build datasets ────────────────────────────────────────────────────────────
+function buildDatasets(commodity) {
+  const datasets = [];
+  const spotHistory = commodity.spot_history || [];
+
+  const spotPts = spotHistory.map(d => ({
+    x: new Date(d.date + 'T12:00:00'),
+    y: d.price,
+  }));
+  if (spotPts.length) {
+    datasets.push({
+      label: 'Historical Spot',
+      data: spotPts,
+      borderColor: 'rgba(254,252,250,0.4)',
+      borderWidth: 1.5,
+      pointRadius: 0,
+      tension: 0.25,
+      spanGaps: true,
+      order: 10,
+    });
+  }
+
+  // Chart.js draws lower dataset indices on top, so list newest first to
+  // render Today in front of the older curves
+  for (const key of ['today', '1d', '7d', '1mo', '3mo', '1yr']) {
+    const snap = commodity.curves?.[key];
+    if (!snap?.data?.length) continue;
+    const style = CURVE_STYLES[key];
+
+    const pts = [];
+    const radii = [];
+
+    // Anchor dot at snapshot date (at the spot price on that date)
+    // This visually ties the forward curve back to the historical section
+    if (key !== 'today' && snap.date) {
+      const anchorPrice = getSpotAtDate(spotHistory, snap.date);
+      if (anchorPrice !== null) {
+        pts.push({ x: new Date(snap.date + 'T12:00:00'), y: anchorPrice });
+        radii.push(5);
+      }
+    }
+
+    snap.data.forEach(d => {
+      pts.push({ x: new Date(d.delivery + '-01T12:00:00'), y: d.price });
+      radii.push(0);
+    });
+
+    datasets.push({
+      label: CURVE_LABELS[key],
+      data: pts,
+      borderColor: style.color,
+      borderWidth: style.width,
+      borderDash: style.dash,
+      pointRadius: radii,
+      pointBackgroundColor: style.color,
+      tension: 0.15,
+      spanGaps: false,
+      ...(key !== 'today' && {
+        segment: {
+          borderDash: ctx => ctx.p0DataIndex === 0 ? [5, 4] : undefined,
+        },
+      }),
+    });
+  }
+
+  return datasets;
+}
+
+// ── Quarter-aligned x-axis bounds ─────────────────────────────────────────────
+function quarterFloor(d) {
+  const m = Math.floor(d.getMonth() / 3) * 3;
+  return new Date(d.getFullYear(), m, 1);
+}
+
+const _18moAgo = new Date(TODAY);
+_18moAgo.setMonth(_18moAgo.getMonth() - 18);
+const X_MIN = quarterFloor(_18moAgo);
+const X_MAX = new Date(TODAY);
+X_MAX.setMonth(X_MAX.getMonth() + 37);
+
+// ── Create chart ──────────────────────────────────────────────────────────────
+function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
+  const yScale = {
+    min:    0,
+    grid:   { color: 'rgba(254,252,250,0.06)', tickLength: 0 },
+    ticks:  { color: 'rgba(254,252,250,0.45)', font: { family: 'Roboto', size: 23 }, callback: v => fmtPrice(v) },
+    border: { display: false },
+  };
+  if (yMax !== null) yScale.max = yMax;
+
+  return new Chart(document.getElementById(canvasId).getContext('2d'), {
+    type: 'line',
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(38,36,35,0.92)',
+          borderColor: 'rgba(254,252,250,0.15)',
+          borderWidth: 1,
+          titleColor: '#FEFCFA',
+          bodyColor: 'rgba(254,252,250,0.75)',
+          titleFont: { family: 'Roboto Slab', size: 23 },
+          bodyFont: { family: 'Roboto', size: 23 },
+          padding: 12,
+          callbacks: {
+            title: items => {
+              const d = new Date(items[0].parsed.x);
+              return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            },
+            label: ctx => ` ${ctx.dataset.label}: ${fmtPrice(ctx.parsed.y)}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          type: 'time',
+          min: X_MIN,
+          max: X_MAX,
+          time: {
+            unit: 'month',
+            stepSize: 3,
+            displayFormats: { month: "MMM ''yy" },
+          },
+          grid: {
+            tickLength: 0,
+            color: ctx => new Date(ctx.tick.value).getMonth() === 0
+              ? 'rgba(254,252,250,0.18)'
+              : 'rgba(254,252,250,0.06)',
+            lineWidth: ctx => new Date(ctx.tick.value).getMonth() === 0 ? 1.5 : 0.75,
+          },
+          ticks:  {
+            color: 'rgba(254,252,250,0.45)',
+            font: { family: 'Roboto', size: 23 },
+            maxRotation: 0,
+            padding: 12,
+            callback: value => new Date(value).getUTCMonth() === 0 ? String(new Date(value).getUTCFullYear()) : '',
+          },
+          border: { display: false },
+        },
+        y: yScale,
+      },
+    },
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const resp = await fetch('energy_data.json?' + Date.now());
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+
+    const dt = new Date(data.generated_at);
+    document.getElementById('updated-time').textContent =
+      dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
+      dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+    createChart('wti-chart', buildDatasets(data.wti), v => `$${Math.round(v)}`);
+    createChart('hh-chart',  buildDatasets(data.hh),  v => `$${v.toFixed(2)}`, { yMax: 8 });
+
+    document.getElementById('status').style.display = 'none';
+
+  } catch (err) {
+    const el = document.getElementById('status');
+    el.innerHTML =
+      `Could not load <code>energy_data.json</code>.<br><br>` +
+      `Run <code>update_data.py</code> first, then refresh this page.<br><br>` +
+      `<small style="opacity:.6">${err.message}</small>`;
+  }
+}
+
+setTimeout(() => location.reload(), 60 * 60 * 1000);
+
+init();
+</script>
+</body>
+</html>

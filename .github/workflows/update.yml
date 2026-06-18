@@ -1,0 +1,42 @@
+name: Update energy data
+
+on:
+  schedule:
+    # 22:00 UTC on weekdays ≈ 5pm Central / 6pm Eastern — after NYMEX settlement.
+    - cron: '0 22 * * 1-5'
+  workflow_dispatch:        # allows a manual run from the Actions tab
+
+permissions:
+  contents: write           # lets the job commit the refreshed JSON back
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch latest prices
+        env:
+          EIA_KEY: ${{ secrets.EIA_KEY }}
+        run: python update_data.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add energy_data.json curve_snapshots.json
+          if git diff --staged --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Auto-update energy data ($(date -u +%Y-%m-%d))"
+            git push
+          fi

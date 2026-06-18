@@ -1,0 +1,15 @@
+# Secrets — never commit
+eia_key.txt
+
+# Local Windows automation (laptop-specific paths/usernames)
+*.bat
+update_log.txt
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+desktop.ini
