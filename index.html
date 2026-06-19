@@ -793,7 +793,8 @@ function updateTicker(key, q) {
 
   const t = new Date(q.market_time);
   asofEl.textContent = 'as of ' +
-    t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    t.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
+    t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
 function applyLive(live) {
