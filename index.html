@@ -833,7 +833,7 @@ async function init() {
     // Live front-month prices: load now, then poll periodically (independent of
     // the hourly full reload). The live.yml Action refreshes live.json server-side.
     loadLive();
-    setInterval(loadLive, 3 * 60 * 1000);
+    setInterval(loadLive, 2 * 60 * 1000);   // poll every 2 min (server refreshes ~every 5 min)
 
   } catch (err) {
     const el = document.getElementById('status');
