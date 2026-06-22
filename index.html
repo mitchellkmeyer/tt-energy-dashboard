@@ -469,11 +469,34 @@ TODAY.setHours(0, 0, 0, 0);
 
 const todayFmt = `${TODAY.getMonth() + 1}/${TODAY.getDate()}/${TODAY.getFullYear()}`;
 
-// Dynamic page title and today legend label
+// The "strip date" is the date the displayed futures curve was actually pulled
+// (the "today" snapshot in energy_data.json), NOT the browser's calendar date.
+// On weekends/before the day's 22:00 UTC update it lags real-now — e.g. viewing
+// Monday shows Friday's strip. applyStripDate() overrides the labels below once
+// the data loads so the "Today (date)" label matches "Futures last updated".
+// `todayFmt` (browser now) is only the pre-load fallback.
 const titleEl = document.getElementById('page-title');
 if (titleEl) titleEl.textContent = `${todayFmt} Strip`;
 document.title = `${todayFmt} Strip — TT`;
 document.getElementById('legend-today-label').textContent = `Today (${todayFmt})`;
+
+// Format an 'YYYY-MM-DD' snapshot date as 'M/D/YYYY' (manual parse — avoids the
+// UTC-midnight day-shift that new Date('YYYY-MM-DD') causes in negative offsets).
+function fmtSnapDate(iso) {
+  const [y, m, d] = String(iso).split('-').map(Number);
+  return `${m}/${d}/${y}`;
+}
+
+// Re-label everything that names the strip date, using the real snapshot date.
+function applyStripDate(iso) {
+  if (!iso) return;
+  const f = fmtSnapDate(iso);
+  CURVE_LABELS.today = `Today (${f})`;
+  if (titleEl) titleEl.textContent = `${f} Strip`;
+  document.title = `${f} Strip — TT`;
+  const lbl = document.getElementById('legend-today-label');
+  if (lbl) lbl.textContent = `Today (${f})`;
+}
 
 // ── Ombre green curve styles (all same width, all solid) ──────────────────────
 const CURVE_STYLES = {
@@ -823,6 +846,10 @@ async function init() {
     document.getElementById('updated-time').textContent =
       dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
       dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+    // Label the "today" curve / title / legend with the real snapshot date so they
+    // stay consistent with "Futures last updated" (not the browser's calendar day).
+    applyStripDate(data.wti?.curves?.today?.date || data.hh?.curves?.today?.date);
 
     const wtiData = [liveDotDataset(), ...buildDatasets(data.wti)];
     const hhData  = [liveDotDataset(), ...buildDatasets(data.hh)];
