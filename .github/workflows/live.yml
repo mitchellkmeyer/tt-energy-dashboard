@@ -34,6 +34,11 @@ jobs:
         run: pip install requests tzdata
 
       - name: Fetch live front-month prices
+        env:
+          # Optional: when set, the ticker pulls real-time OANDA CFD prices instead
+          # of delayed Yahoo. Absent/empty -> automatic Yahoo fallback (no failure).
+          OANDA_TOKEN:   ${{ secrets.OANDA_TOKEN }}
+          OANDA_ACCOUNT: ${{ secrets.OANDA_ACCOUNT }}
         run: python update_live.py
 
       - name: Commit live data (only if changed)

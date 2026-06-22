@@ -1,17 +1,24 @@
 """
 Live front-month price updater — writes live.json for the dashboard ticker.
 
-Lightweight companion to update_data.py. Hits Yahoo Finance's public chart
-endpoint *server-side* (no API key, and no browser-CORS limits), so it can run
-frequently during market hours via GitHub Actions. The dashboard polls the
-resulting live.json to update the copper ticker box + dot in place.
+Lightweight companion to update_data.py. The dashboard polls live.json to update
+the gold ticker box + sparkline + dot in place.
 
-  CL=F = WTI crude front-month continuous
-  NG=F = Henry Hub natural gas front-month continuous
+PRICE SOURCE (front-month ticker + sparkline):
+  * OANDA v20 (real-time CFD) if an OANDA token is configured — WTICO_USD / NATGAS_USD
+    update ~every few seconds, so the ticker is genuinely live (no ~15-min delay).
+    These CFDs track the WTI / nat-gas front month within a small basis.
+  * Yahoo Finance (CL=F / NG=F, exchange-DELAYED ~15 min) as an automatic fallback
+    when OANDA isn't configured or errors — so the ticker never goes blank.
+
+The FORWARD CURVE overlay (live_curve.json) stays on Yahoo dated contracts — OANDA
+only quotes the front CFD, not the 36-month strip, and the curve barely moves
+intraday so the delay is immaterial there.
 """
+import os
 import json
 import requests
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 from pathlib import Path
 
@@ -22,6 +29,25 @@ ET  = ZoneInfo('America/New_York')          # NYMEX exchange timezone
 
 SYMBOLS = {'wti': 'CL=F', 'hh': 'NG=F'}
 UA = {'User-Agent': 'Mozilla/5.0'}
+
+
+# ── OANDA real-time config ────────────────────────────────────────────────────
+def _secret(env_name: str, fname: str) -> str:
+    """Read a secret from an env var (CI) or a git-ignored local file (manual run)."""
+    v = os.environ.get(env_name, '').strip()
+    if v:
+        return v
+    p = DIR / fname
+    return p.read_text(encoding='utf-8').strip() if p.exists() else ''
+
+OANDA_TOKEN   = _secret('OANDA_TOKEN', 'oanda_token.txt')
+OANDA_ACCOUNT = _secret('OANDA_ACCOUNT', 'oanda_account.txt')   # optional — auto-resolved if blank
+# Personal-access tokens from a *demo* (practice) account use the practice host;
+# a funded live account uses api-fxtrade. Default to practice (free).
+OANDA_HOST = ('https://api-fxtrade.oanda.com'
+              if os.environ.get('OANDA_ENV', 'practice').lower() == 'live'
+              else 'https://api-fxpractice.oanda.com')
+OANDA_INSTR = {'wti': 'WTICO_USD', 'hh': 'NATGAS_USD'}
 
 # Full-strip (live forward curve) config. The strip is ~36 dated contracts per
 # commodity, so it's far heavier than the 2-call front-month pull — we throttle
@@ -170,23 +196,112 @@ def update_live_curve() -> None:
     print(f"Written -> {CURVE_OUT}")
 
 
+# ── OANDA real-time front-month (CFD) ─────────────────────────────────────────
+_OANDA_ACCT_CACHE = None
+
+
+def _oanda_headers() -> dict:
+    return {'Authorization': f'Bearer {OANDA_TOKEN}'}
+
+
+def oanda_account_id() -> str:
+    """Resolve the account id from the token (so only OANDA_TOKEN must be set)."""
+    global _OANDA_ACCT_CACHE
+    if OANDA_ACCOUNT:
+        return OANDA_ACCOUNT
+    if _OANDA_ACCT_CACHE:
+        return _OANDA_ACCT_CACHE
+    r = requests.get(f'{OANDA_HOST}/v3/accounts', headers=_oanda_headers(), timeout=20)
+    r.raise_for_status()
+    _OANDA_ACCT_CACHE = r.json()['accounts'][0]['id']
+    return _OANDA_ACCT_CACHE
+
+
+def _norm_time(s: str) -> str:
+    """OANDA RFC3339 (up to 9 fractional digits + 'Z') -> JS-parseable ISO (UTC)."""
+    s = s.rstrip('Z').split('.')[0]
+    return datetime.fromisoformat(s).replace(tzinfo=timezone.utc).isoformat()
+
+
+def _oanda_candles(instrument: str, **params) -> list:
+    url = f'{OANDA_HOST}/v3/instruments/{instrument}/candles'
+    r = requests.get(url, params={'price': 'M', **params}, headers=_oanda_headers(), timeout=20)
+    r.raise_for_status()
+    return r.json().get('candles', [])
+
+
+def oanda_quote(key: str) -> dict:
+    """Real-time CFD quote + intraday spark for one commodity, from OANDA."""
+    instrument = OANDA_INSTR[key]
+    acct = oanda_account_id()
+
+    # Current price (mid of bid/ask).
+    r = requests.get(f'{OANDA_HOST}/v3/accounts/{acct}/pricing',
+                     params={'instruments': instrument}, headers=_oanda_headers(), timeout=20)
+    r.raise_for_status()
+    p     = r.json()['prices'][0]
+    bid   = float(p['bids'][0]['price'])
+    ask   = float(p['asks'][0]['price'])
+    price = (bid + ask) / 2
+
+    # Previous trading day's close = last *completed* daily candle.
+    daily = [c for c in _oanda_candles(instrument, granularity='D', count=3) if c.get('complete')]
+    prev_close = float(daily[-1]['mid']['c']) if daily else price
+
+    # Today's intraday 5-min closes for the sparkline (from start of the ET day).
+    et_midnight = datetime.now(ET).replace(hour=0, minute=0, second=0, microsecond=0)
+    frm = et_midnight.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
+    spark = [round(float(c['mid']['c']), 4)
+             for c in _oanda_candles(instrument, granularity='M5', **{'from': frm})
+             if c.get('complete')]
+
+    change = price - prev_close
+    pct    = (change / prev_close * 100) if prev_close else 0.0
+    return {
+        'price':       round(price, 4),
+        'prev_close':  round(prev_close, 4),
+        'change':      round(change, 4),
+        'pct':         round(pct, 2),
+        'market_time': _norm_time(p['time']),
+        'spark':       spark,
+        'source':      'oanda',
+    }
+
+
+def fetch_yahoo(key: str, sym: str) -> dict:
+    """Delayed Yahoo fallback (front-month future + intraday spark)."""
+    q = fetch_quote(sym)
+    try:
+        q['spark'] = fetch_intraday(sym)
+    except Exception as se:
+        q['spark'] = []
+        print(f"{key.upper():3} {sym}: spark error {se}")
+    q['source'] = 'yahoo'
+    return q
+
+
 def main() -> None:
+    use_oanda = bool(OANDA_TOKEN)
+    print(f"Price source: {'OANDA (real-time)' if use_oanda else 'Yahoo (delayed)'}")
+
     out = {'generated_at': datetime.now().astimezone().isoformat()}
     for key, sym in SYMBOLS.items():
-        try:
-            q = fetch_quote(sym)
+        q = None
+        if use_oanda:
             try:
-                q['spark'] = fetch_intraday(sym)
-            except Exception as se:
-                q['spark'] = []
-                print(f"{key.upper():3} {sym}: spark error {se}")
-            out[key] = q
-            print(f"{key.upper():3} {sym}: {q['price']}  "
+                q = oanda_quote(key)
+            except Exception as e:
+                print(f"{key.upper():3} OANDA error: {e} — falling back to Yahoo")
+        if q is None:
+            try:
+                q = fetch_yahoo(key, sym)
+            except Exception as e:
+                print(f"{key.upper():3} {sym}: error {e}")
+        out[key] = q
+        if q:
+            print(f"{key.upper():3} {q['source']:5}: {q['price']}  "
                   f"({q['change']:+} / {q['pct']:+}%)  {len(q['spark'])} pts  "
                   f"as of {q['market_time']}")
-        except Exception as e:
-            print(f"{key.upper():3} {sym}: error {e}")
-            out[key] = None
     OUT.write_text(json.dumps(out, indent=2), encoding='utf-8')
     print(f"Written -> {OUT}")
 
