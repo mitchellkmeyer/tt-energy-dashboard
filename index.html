@@ -487,6 +487,12 @@ function fmtSnapDate(iso) {
   return `${m}/${d}/${y}`;
 }
 
+// "Jun 22, 2026 05:23 PM" — the shared format for the "Futures last updated" stamp.
+function fmtStamp(d) {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
+         d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
 // The settled "today" snapshot date currently shown (from energy_data.json). The
 // live-curve overlay only replaces the today line when its data is at least this
 // fresh, so a stale live_curve.json can never regress the chart behind the settle.
@@ -855,6 +861,11 @@ function applyLiveCurve(curve) {
   applyStripDate(cDate);                  // relabel first so overlayCurve picks up the new label
   overlayCurve(wtiChart, curve.wti);
   overlayCurve(hhChart,  curve.hh);
+  // The displayed curve is now the live pull, so reflect that in "Futures last updated".
+  if (curve.generated_at) {
+    const el = document.getElementById('updated-time');
+    if (el) el.textContent = fmtStamp(new Date(curve.generated_at));
+  }
 }
 
 async function loadLive() {
@@ -875,10 +886,7 @@ async function init() {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
 
-    const dt = new Date(data.generated_at);
-    document.getElementById('updated-time').textContent =
-      dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
-      dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('updated-time').textContent = fmtStamp(new Date(data.generated_at));
 
     // Label the "today" curve / title / legend with the real snapshot date so they
     // stay consistent with "Futures last updated" (not the browser's calendar day).
