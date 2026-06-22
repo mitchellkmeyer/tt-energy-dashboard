@@ -442,7 +442,7 @@
   </div>
   <div class="legend-item">
     <div class="legend-swatch" style="background:#92CC9A;"></div>
-    Yesterday
+    <span id="legend-1d-label">Yesterday</span>
   </div>
   <div class="legend-item">
     <div class="legend-swatch" style="background:#7EBF87;"></div>
@@ -497,6 +497,14 @@ function fmtStamp(d) {
 // live-curve overlay only replaces the today line when its data is at least this
 // fresh, so a stale live_curve.json can never regress the chart behind the settle.
 let stripSettledDate = null;
+let strip1dDate = null;   // snapshot date of the previous-trading-day ("1d") curve
+
+// Parse 'YYYY-MM-DD' to a local-midnight Date (tz-safe — avoids the UTC day-shift
+// of new Date('YYYY-MM-DD')).
+function dateFromIso(iso) {
+  const [y, m, d] = String(iso).split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
 
 // Re-label everything that names the strip date, using the real snapshot date.
 function applyStripDate(iso) {
@@ -507,6 +515,28 @@ function applyStripDate(iso) {
   document.title = `${f} Strip — TT`;
   const lbl = document.getElementById('legend-today-label');
   if (lbl) lbl.textContent = `Today (${f})`;
+}
+
+// Label the previous-trading-day curve: "Yesterday" when its snapshot is exactly
+// the calendar day before the shown "today" date, otherwise that day's weekday name
+// ("Thursday", "Friday", "Monday"…) — so after a weekend/holiday it reads the real
+// last trading day. Anchored to todayIso so the pair stays coherent as Today advances.
+function applyPrevDayLabel(todayIso, prevIso) {
+  if (!prevIso) return;
+  const prev = dateFromIso(prevIso);
+  let label = prev.toLocaleDateString('en-US', { weekday: 'long' });
+  if (todayIso) {
+    const before = dateFromIso(todayIso);
+    before.setDate(before.getDate() - 1);
+    if (before.getFullYear() === prev.getFullYear() &&
+        before.getMonth()    === prev.getMonth() &&
+        before.getDate()     === prev.getDate()) {
+      label = 'Yesterday';
+    }
+  }
+  CURVE_LABELS['1d'] = label;
+  const el = document.getElementById('legend-1d-label');
+  if (el) el.textContent = label;
 }
 
 // ── Ombre green curve styles (all same width, all solid) ──────────────────────
@@ -859,6 +889,11 @@ function applyLiveCurve(curve) {
   const cDate = curve.wti?.date || curve.hh?.date;
   if (!cDate || (stripSettledDate && cDate < stripSettledDate)) return;
   applyStripDate(cDate);                  // relabel first so overlayCurve picks up the new label
+  applyPrevDayLabel(cDate, strip1dDate);  // "Yesterday" vs weekday is relative to the live today
+  [wtiChart, hhChart].forEach(ch => {
+    const ds = ch?.data.datasets.find(d => d._curveKey === '1d');
+    if (ds) ds.label = CURVE_LABELS['1d'];
+  });
   overlayCurve(wtiChart, curve.wti);
   overlayCurve(hhChart,  curve.hh);
   // The displayed curve is now the live pull, so reflect that in "Futures last updated".
@@ -891,7 +926,9 @@ async function init() {
     // Label the "today" curve / title / legend with the real snapshot date so they
     // stay consistent with "Futures last updated" (not the browser's calendar day).
     stripSettledDate = data.wti?.curves?.today?.date || data.hh?.curves?.today?.date || null;
+    strip1dDate      = data.wti?.curves?.['1d']?.date || data.hh?.curves?.['1d']?.date || null;
     applyStripDate(stripSettledDate);
+    applyPrevDayLabel(stripSettledDate, strip1dDate);
 
     const wtiData = [liveDotDataset(), ...buildDatasets(data.wti)];
     const hhData  = [liveDotDataset(), ...buildDatasets(data.hh)];
