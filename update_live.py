@@ -11,16 +11,27 @@ resulting live.json to update the copper ticker box + dot in place.
 """
 import json
 import requests
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 from pathlib import Path
 
 DIR = Path(__file__).parent
 OUT = DIR / 'live.json'
+CURVE_OUT = DIR / 'live_curve.json'         # intraday forward-curve overlay
 ET  = ZoneInfo('America/New_York')          # NYMEX exchange timezone
 
 SYMBOLS = {'wti': 'CL=F', 'hh': 'NG=F'}
 UA = {'User-Agent': 'Mozilla/5.0'}
+
+# Full-strip (live forward curve) config. The strip is ~36 dated contracts per
+# commodity, so it's far heavier than the 2-call front-month pull — we throttle
+# it to refresh at most every CURVE_REFRESH_MIN minutes (the strip doesn't whip
+# around like the front month, so intra-day-but-not-every-5-min is plenty).
+CURVE_PREFIX     = {'wti': 'CL', 'hh': 'NG'}
+MONTHS_FORWARD   = 36
+CURVE_REFRESH_MIN = 20
+MONTH_CODES = {1: 'F', 2: 'G', 3: 'H', 4: 'J',  5: 'K',  6: 'M',
+               7: 'N', 8: 'Q', 9: 'U', 10: 'V', 11: 'X', 12: 'Z'}
 
 
 def fetch_quote(symbol: str) -> dict:
@@ -79,6 +90,86 @@ def fetch_intraday(symbol: str) -> list:
     return [round(float(c), 4) for c in closes if c is not None]
 
 
+def add_months(d: date, n: int) -> date:
+    m = d.month - 1 + n
+    return date(d.year + m // 12, m % 12 + 1, 1)
+
+
+def contract_symbol(prefix: str, yr: int, mo: int) -> str:
+    """e.g. ('CL', 2026, 7) -> 'CLN26.NYM' (same dated NYMEX symbol yfinance uses)."""
+    return f"{prefix}{MONTH_CODES[mo]}{str(yr)[2:]}.NYM"
+
+
+def fetch_contract_price(symbol: str):
+    """Latest live price for one dated contract via Yahoo's v8 chart endpoint.
+
+    query2 serves the dated .NYM symbols (query1 sometimes 404s on them), so try
+    it first and fall back. Returns None on any failure (caller drops the point).
+    """
+    for host in ('query2', 'query1'):
+        try:
+            url = f'https://{host}.finance.yahoo.com/v8/finance/chart/{symbol}'
+            r = requests.get(url, params={'range': '1d', 'interval': '1d'},
+                             headers=UA, timeout=20)
+            if r.status_code != 200:
+                continue
+            meta = r.json()['chart']['result'][0]['meta']
+            p = meta.get('regularMarketPrice')
+            if p is not None:
+                return float(p)
+        except Exception:
+            continue
+    return None
+
+
+def fetch_live_curve(prefix: str, months: int = MONTHS_FORWARD) -> list:
+    """Today's live forward curve: front month -> N months out, dated contracts.
+
+    Mirrors update_data.py's strip exactly (add_months(today, i) deliveries) so the
+    overlay lines up on the same x-values as the daily settled snapshot.
+    """
+    today = date.today()
+    strip = []
+    for i in range(1, months + 1):
+        d = add_months(today, i)
+        price = fetch_contract_price(contract_symbol(prefix, d.year, d.month))
+        if price is not None:
+            strip.append({'delivery': f"{d.year}-{d.month:02d}", 'price': round(price, 4)})
+    return strip
+
+
+def curve_is_fresh() -> bool:
+    """True if live_curve.json was refreshed < CURVE_REFRESH_MIN minutes ago."""
+    if not CURVE_OUT.exists():
+        return False
+    try:
+        prev = json.loads(CURVE_OUT.read_text(encoding='utf-8'))
+        ts = datetime.fromisoformat(prev['generated_at'])
+        age_min = (datetime.now().astimezone() - ts).total_seconds() / 60
+        return 0 <= age_min < CURVE_REFRESH_MIN
+    except Exception:
+        return False
+
+
+def update_live_curve() -> None:
+    """Refresh live_curve.json unless it's still fresh (throttle the heavy pull)."""
+    if curve_is_fresh():
+        print(f"Live curve still fresh (<{CURVE_REFRESH_MIN}m) — skipping strip refresh.")
+        return
+    today_str = date.today().isoformat()
+    out = {'generated_at': datetime.now().astimezone().isoformat()}
+    for key, prefix in CURVE_PREFIX.items():
+        try:
+            strip = fetch_live_curve(prefix)
+            out[key] = {'date': today_str, 'data': strip}
+            print(f"{key.upper():3} live curve: {len(strip)}/{MONTHS_FORWARD} contracts")
+        except Exception as e:
+            print(f"{key.upper():3} live curve error: {e}")
+            out[key] = None
+    CURVE_OUT.write_text(json.dumps(out, indent=2), encoding='utf-8')
+    print(f"Written -> {CURVE_OUT}")
+
+
 def main() -> None:
     out = {'generated_at': datetime.now().astimezone().isoformat()}
     for key, sym in SYMBOLS.items():
@@ -98,6 +189,12 @@ def main() -> None:
             out[key] = None
     OUT.write_text(json.dumps(out, indent=2), encoding='utf-8')
     print(f"Written -> {OUT}")
+
+    # Forward-curve overlay (throttled internally so it doesn't run every cycle).
+    try:
+        update_live_curve()
+    except Exception as e:
+        print(f"Live curve update failed: {e}")
 
 
 if __name__ == '__main__':

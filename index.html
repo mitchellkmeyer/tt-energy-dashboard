@@ -487,6 +487,11 @@ function fmtSnapDate(iso) {
   return `${m}/${d}/${y}`;
 }
 
+// The settled "today" snapshot date currently shown (from energy_data.json). The
+// live-curve overlay only replaces the today line when its data is at least this
+// fresh, so a stale live_curve.json can never regress the chart behind the settle.
+let stripSettledDate = null;
+
 // Re-label everything that names the strip date, using the real snapshot date.
 function applyStripDate(iso) {
   if (!iso) return;
@@ -602,6 +607,7 @@ function buildDatasets(commodity) {
 
     datasets.push({
       label: CURVE_LABELS[key],
+      _curveKey: key,                       // tag for the live-curve overlay lookup
       data: pts,
       borderColor: style.color,
       borderWidth: style.width,
@@ -827,12 +833,39 @@ function applyLive(live) {
   updateDot(hhChart,  live.hh  ? live.hh.price  : null);
 }
 
+// Overlay the live intraday forward curve onto the ivory "today" line. Replaces
+// just that dataset's points (keeps its styling) and re-labels the strip date, so
+// during the trading day the curve and "Today (date)" track live — while the daily
+// settled snapshot stays the historical reference for the older comparison curves.
+function overlayCurve(chart, c) {
+  if (!chart || !c?.data?.length) return;
+  const ds = chart.data.datasets.find(d => d._curveKey === 'today');
+  if (!ds) return;
+  ds.data = c.data.map(d => ({ x: new Date(d.delivery + '-01T12:00:00'), y: d.price }));
+  ds.pointRadius = 0;
+  ds.label = CURVE_LABELS.today;          // keep tooltip label in sync with the date
+  chart.update('none');
+}
+
+function applyLiveCurve(curve) {
+  if (!curve) return;
+  // Don't let a stale live_curve.json regress the chart behind the settled snapshot.
+  const cDate = curve.wti?.date || curve.hh?.date;
+  if (!cDate || (stripSettledDate && cDate < stripSettledDate)) return;
+  applyStripDate(cDate);                  // relabel first so overlayCurve picks up the new label
+  overlayCurve(wtiChart, curve.wti);
+  overlayCurve(hhChart,  curve.hh);
+}
+
 async function loadLive() {
   try {
     const r = await fetch('live.json?' + Date.now());
-    if (!r.ok) return;
-    applyLive(await r.json());
+    if (r.ok) applyLive(await r.json());
   } catch (_) { /* keep last shown values on a hiccup */ }
+  try {
+    const rc = await fetch('live_curve.json?' + Date.now());
+    if (rc.ok) applyLiveCurve(await rc.json());
+  } catch (_) { /* no live curve yet — settled snapshot stays */ }
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -849,7 +882,8 @@ async function init() {
 
     // Label the "today" curve / title / legend with the real snapshot date so they
     // stay consistent with "Futures last updated" (not the browser's calendar day).
-    applyStripDate(data.wti?.curves?.today?.date || data.hh?.curves?.today?.date);
+    stripSettledDate = data.wti?.curves?.today?.date || data.hh?.curves?.today?.date || null;
+    applyStripDate(stripSettledDate);
 
     const wtiData = [liveDotDataset(), ...buildDatasets(data.wti)];
     const hhData  = [liveDotDataset(), ...buildDatasets(data.hh)];

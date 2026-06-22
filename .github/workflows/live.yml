@@ -36,11 +36,11 @@ jobs:
       - name: Fetch live front-month prices
         run: python update_live.py
 
-      - name: Commit live.json (only if changed)
+      - name: Commit live data (only if changed)
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add live.json
+          git add live.json live_curve.json
           if git diff --staged --quiet; then
             echo "No live price change."
           else
