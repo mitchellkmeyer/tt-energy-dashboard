@@ -18,12 +18,16 @@ import requests
 import pandas as pd
 import yfinance as yf
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 warnings.filterwarnings('ignore')
 
 # ── Config ────────────────────────────────────────────────────────────────────
 DIR            = Path(__file__).parent
+ET             = ZoneInfo('America/New_York')   # NYMEX exchange timezone — the
+#                 reference for "today". Using the runner's UTC clock would roll
+#                 the date over at 8pm ET and mislabel the strip as tomorrow.
 
 # EIA key is never committed. The GitHub Action injects it via the EIA_KEY env
 # var (from an encrypted repo secret). For local/manual runs, drop the key into
@@ -54,6 +58,17 @@ MONTH_CODES = {1:'F',2:'G',3:'H',4:'J',5:'K',6:'M',
 def add_months(d: date, n: int) -> date:
     m = d.month - 1 + n
     return date(d.year + m // 12, m % 12 + 1, 1)
+
+
+def prev_trading_day(d: date) -> date:
+    """The trading day before d — skips Sat/Sun so Monday's 'yesterday' is Friday
+    (not the calendar day before, which would be Sunday). Holidays aren't tracked,
+    but the display picks the nearest actual snapshot so a missing holiday is fine.
+    """
+    p = d - timedelta(days=1)
+    while p.weekday() >= 5:        # 5=Sat, 6=Sun
+        p -= timedelta(days=1)
+    return p
 
 
 def make_ticker(prefix: str, yr: int, mo: int, exch: str = '.NYM') -> str:
@@ -108,7 +123,7 @@ def _fetch_contract(ticker: str, **hist_kwargs) -> float | None:
 
 def fetch_strip(prefix: str, months: int = MONTHS_FORWARD) -> list[dict]:
     """Fetch today's forward curve (today → N months out)."""
-    today = date.today()
+    today = datetime.now(ET).date()
     strip = []
     for i in range(1, months + 1):
         d = ticker_dt = add_months(today, i)
@@ -197,7 +212,7 @@ def nearest(snaps: dict, target: date, tol: int = 14) -> str | None:
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    today     = date.today()
+    today     = datetime.now(ET).date()
     today_str = today.strftime('%Y-%m-%d')
     print(f"=== Energy Dashboard Update — {today_str} ===\n")
 
@@ -222,12 +237,20 @@ def main() -> None:
     hh_strip = fetch_strip('NG')
     print(f"  → {len(hh_strip)} contracts with data")
 
-    if wti_strip: snaps['wti'][today_str] = wti_strip
-    if hh_strip:  snaps['hh'][today_str]  = hh_strip
+    # Only snapshot on trading days. On weekends the strip is just Friday's frozen
+    # settle, so saving it under a Sat/Sun key pollutes history and makes Monday's
+    # "yesterday" resolve to Sunday. (Holidays still snapshot a stale settle, but
+    # those are rare and the previous-trading-day lookup below tolerates them.)
+    is_trading_day = today.weekday() < 5
+    if not is_trading_day:
+        print(f"{today_str} is a weekend — skipping snapshot (market closed).")
+    else:
+        if wti_strip: snaps['wti'][today_str] = wti_strip
+        if hh_strip:  snaps['hh'][today_str]  = hh_strip
 
     # ── 3. Backfill missing historical snapshots ──────────────────────────────
     targets = {
-        '1d':  today - timedelta(days=1),
+        '1d':  prev_trading_day(today),
         '7d':  today - timedelta(days=7),
         '1mo': today - timedelta(days=30),
         '3mo': today - timedelta(days=91),

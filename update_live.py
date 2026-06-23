@@ -168,7 +168,7 @@ def fetch_live_curve(prefix: str, months: int = MONTHS_FORWARD) -> list:
     Mirrors update_data.py's strip exactly (add_months(today, i) deliveries) so the
     overlay lines up on the same x-values as the daily settled snapshot.
     """
-    today = date.today()
+    today = datetime.now(ET).date()
     strip = []
     for i in range(1, months + 1):
         d = add_months(today, i)
@@ -196,7 +196,9 @@ def update_live_curve() -> None:
     if curve_is_fresh():
         print(f"Live curve still fresh (<{CURVE_REFRESH_MIN}m) — skipping strip refresh.")
         return
-    today_str = date.today().isoformat()
+    # ET (market) date, not the runner's UTC date — otherwise after ~8pm ET the
+    # overlay stamps tomorrow and the "Today" line jumps a day ahead.
+    today_str = datetime.now(ET).date().isoformat()
     out = {'generated_at': datetime.now().astimezone().isoformat()}
     for key, prefix in CURVE_PREFIX.items():
         try:
