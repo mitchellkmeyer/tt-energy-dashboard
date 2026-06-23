@@ -393,7 +393,7 @@
   <div class="chart-panel">
     <div class="chart-title">
       <span class="chart-title-left">
-        WTI Crude Oil
+        WTI
         <span class="chart-unit">$/bbl</span>
       </span>
       <span class="ticker-wrap">
@@ -412,7 +412,7 @@
   <div class="chart-panel">
     <div class="chart-title">
       <span class="chart-title-left">
-        Henry Hub Natural Gas
+        Henry Hub
         <span class="chart-unit">$/MMBtu</span>
       </span>
       <span class="ticker-wrap">
@@ -742,7 +742,13 @@ function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
             font: { family: 'Roboto', size: 23 },
             maxRotation: 0,
             padding: 12,
-            callback: value => new Date(value).getUTCMonth() === 0 ? String(new Date(value).getUTCFullYear()) : '',
+            // Don't let Chart.js auto-skip ticks: on narrow widths it can drop the
+            // January tick, and since only January renders a label the years vanish.
+            // Keeping all quarterly ticks is cheap — non-January labels are blank.
+            autoSkip: false,
+            // Use local month/year so the year label lands on the same tick the grid
+            // highlights as January (grid uses local getMonth()).
+            callback: value => new Date(value).getMonth() === 0 ? String(new Date(value).getFullYear()) : '',
           },
           border: { display: false },
         },
