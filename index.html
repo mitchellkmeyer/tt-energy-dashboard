@@ -487,6 +487,14 @@ function fmtSnapDate(iso) {
   return `${m}/${d}/${y}`;
 }
 
+// Parse a backend timestamp as a Date. Backend stamps are UTC; if one lacks a
+// timezone offset, JS would parse it as *local* and show the UTC wall-clock
+// (e.g. 6:19 PM instead of 1:19 PM Central). Append 'Z' so naive stamps are UTC.
+function parseStamp(s) {
+  if (typeof s === 'string' && !/([zZ]|[+-]\d{2}:?\d{2})$/.test(s)) s += 'Z';
+  return new Date(s);
+}
+
 // "Jun 22, 2026 05:23 PM" — the shared format for the "Futures last updated" stamp.
 function fmtStamp(d) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
@@ -856,7 +864,7 @@ function updateTicker(key, q) {
   changeEl.textContent =
     `${arrow} ${Math.abs(q.change).toFixed(fmt.dec)} (${Math.abs(q.pct).toFixed(2)}%)`;
 
-  const t = new Date(q.market_time);
+  const t = parseStamp(q.market_time);
   asofEl.textContent = 'as of ' +
     t.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
     t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -899,7 +907,7 @@ function applyLiveCurve(curve) {
   // The displayed curve is now the live pull, so reflect that in "Futures last updated".
   if (curve.generated_at) {
     const el = document.getElementById('updated-time');
-    if (el) el.textContent = fmtStamp(new Date(curve.generated_at));
+    if (el) el.textContent = fmtStamp(parseStamp(curve.generated_at));
   }
 }
 
@@ -921,7 +929,7 @@ async function init() {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
 
-    document.getElementById('updated-time').textContent = fmtStamp(new Date(data.generated_at));
+    document.getElementById('updated-time').textContent = fmtStamp(parseStamp(data.generated_at));
 
     // Label the "today" curve / title / legend with the real snapshot date so they
     // stay consistent with "Futures last updated" (not the browser's calendar day).

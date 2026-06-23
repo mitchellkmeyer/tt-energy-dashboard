@@ -300,7 +300,9 @@ def main() -> None:
 
     # ── 5. Write final JSON ───────────────────────────────────────────────────
     output = {
-        'generated_at': datetime.now().isoformat(),
+        # Timezone-aware so the browser converts to the viewer's local time. A naive
+        # stamp (no offset) gets parsed as local, showing the UTC wall-clock instead.
+        'generated_at': datetime.now(ET).isoformat(),
         'wti': {'spot_history': wti_spot, 'curves': pick_curves(snaps.get('wti', {}))},
         'hh':  {'spot_history': hh_spot,  'curves': pick_curves(snaps.get('hh',  {}))},
     }
