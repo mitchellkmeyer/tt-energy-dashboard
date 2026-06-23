@@ -730,6 +730,22 @@ function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
             stepSize: 3,
             displayFormats: { month: "MMM ''yy" },
           },
+          // Force a deterministic quarterly tick set (Jan/Apr/Jul/Oct, anchored on
+          // the quarter-aligned X_MIN). Chart.js's adaptive tick generation thins
+          // ticks at narrow widths and could drop the January tick entirely, which
+          // — since only January draws a bright gridline + year label — made the
+          // year markers disappear on smaller screens. Building the ticks ourselves
+          // (plus autoSkip:false below) guarantees January is always present.
+          afterBuildTicks: (axis) => {
+            const ticks = [];
+            const d = new Date(X_MIN);
+            const end = new Date(X_MAX).getTime();
+            while (d.getTime() <= end) {
+              ticks.push({ value: d.getTime() });
+              d.setMonth(d.getMonth() + 3);
+            }
+            axis.ticks = ticks;
+          },
           grid: {
             tickLength: 0,
             color: ctx => new Date(ctx.tick.value).getMonth() === 0
