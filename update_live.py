@@ -306,8 +306,13 @@ def _read_prev_live() -> dict:
 
 
 def oilprice_due(prev: dict) -> bool:
-    """True if it's been >= OILPRICE_MIN_MIN since the last write (rate-limit guard)."""
-    ts = (prev or {}).get('generated_at')
+    """True if >= OILPRICE_MIN_MIN has passed since the last *actual* OilPriceAPI pull.
+
+    Gated on a dedicated `oilprice_pulled_at` stamp — NOT generated_at, which every
+    run rewrites (that would throttle forever after the first pull). Absent stamp
+    (cold start / source just switched on) -> due, so the first pull always fires.
+    """
+    ts = (prev or {}).get('oilprice_pulled_at')
     if not ts:
         return True
     try:
@@ -373,17 +378,20 @@ def main() -> None:
     print(f"Price source: {source_label}")
 
     prev = _read_prev_live()
+    now_iso = datetime.now().astimezone().isoformat()
     fetch_oilprice = bool(OILPRICE_KEY) and oilprice_due(prev)
     if OILPRICE_KEY and not fetch_oilprice:
         print(f"OilPriceAPI throttled (<{OILPRICE_MIN_MIN}m since last pull) — carrying last price.")
 
-    out = {'generated_at': datetime.now().astimezone().isoformat()}
+    out = {'generated_at': now_iso}
+    pulled_ok = False
     for key, sym in SYMBOLS.items():
         q = None
         if OILPRICE_KEY:
             if fetch_oilprice:
                 try:
                     q = oilprice_quote(key, prev)
+                    pulled_ok = True
                 except Exception as e:
                     print(f"{key.upper():3} OilPriceAPI error: {e} — falling back")
             elif (prev.get(key) or {}).get('source') == 'oilprice':
@@ -403,6 +411,12 @@ def main() -> None:
             print(f"{key.upper():3} {q['source']:5}: {q['price']}  "
                   f"({q['change']:+} / {q['pct']:+}%)  {len(q['spark'])} pts  "
                   f"as of {q['market_time']}")
+
+    # Throttle clock advances only on a *successful* pull; a failed/throttled run
+    # keeps the prior stamp so the next run is due to retry rather than blocked.
+    if OILPRICE_KEY:
+        out['oilprice_pulled_at'] = now_iso if pulled_ok else prev.get('oilprice_pulled_at')
+
     OUT.write_text(json.dumps(out, indent=2), encoding='utf-8')
     print(f"Written -> {OUT}")
 
