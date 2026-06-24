@@ -683,6 +683,42 @@ const X_MIN = quarterFloor(_18moAgo);
 const X_MAX = new Date(TODAY);
 X_MAX.setMonth(X_MAX.getMonth() + 37);
 
+// ── January markers plugin ────────────────────────────────────────────────────
+// Draws the bright January gridlines + year labels ourselves, by pixel position,
+// instead of relying on Chart.js axis ticks. Chart.js's time-scale tick reducer
+// thins ticks at narrow widths (even with autoSkip:false) and consistently lands
+// on Apr/Oct, dropping January entirely — so the year markers vanished on smaller
+// screens. Computing Jan-1 pixels directly is immune to tick generation and width.
+const januaryMarkers = {
+  id: 'januaryMarkers',
+  // behind the data so the line sits like a background gridline
+  beforeDatasetsDraw(chart) {
+    const x = chart.scales.x, area = chart.chartArea, ctx = chart.ctx;
+    if (!x) return;
+    const startYear = new Date(x.min).getFullYear();
+    const endYear   = new Date(x.max).getFullYear();
+    ctx.save();
+    for (let yr = startYear; yr <= endYear; yr++) {
+      const jan1 = new Date(yr, 0, 1).getTime();
+      if (jan1 < x.min || jan1 > x.max) continue;
+      const px = x.getPixelForValue(jan1);
+      if (px < area.left - 0.5 || px > area.right + 0.5) continue;
+      ctx.beginPath();
+      ctx.moveTo(px, area.top);
+      ctx.lineTo(px, area.bottom);
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(254,252,250,0.18)';
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(254,252,250,0.45)';
+      ctx.font = '400 23px Roboto';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(String(yr), px, area.bottom + 12);
+    }
+    ctx.restore();
+  },
+};
+
 // ── Create chart ──────────────────────────────────────────────────────────────
 function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
   const yScale = {
@@ -696,10 +732,13 @@ function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
   return new Chart(document.getElementById(canvasId).getContext('2d'), {
     type: 'line',
     data: { datasets },
+    plugins: [januaryMarkers],
     options: {
       responsive: true,
       maintainAspectRatio: false,
       animation: false,
+      // reserve room below the plot for the plugin-drawn year labels
+      layout: { padding: { bottom: 30 } },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -730,41 +769,22 @@ function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
             stepSize: 3,
             displayFormats: { month: "MMM ''yy" },
           },
-          // Force a deterministic quarterly tick set (Jan/Apr/Jul/Oct, anchored on
-          // the quarter-aligned X_MIN). Chart.js's adaptive tick generation thins
-          // ticks at narrow widths and could drop the January tick entirely, which
-          // — since only January draws a bright gridline + year label — made the
-          // year markers disappear on smaller screens. Building the ticks ourselves
-          // (plus autoSkip:false below) guarantees January is always present.
-          afterBuildTicks: (axis) => {
-            const ticks = [];
-            const d = new Date(X_MIN);
-            const end = new Date(X_MAX).getTime();
-            while (d.getTime() <= end) {
-              ticks.push({ value: d.getTime() });
-              d.setMonth(d.getMonth() + 3);
-            }
-            axis.ticks = ticks;
-          },
+          // Faint quarterly gridlines come from the normal ticks; the bright
+          // January lines + year labels are drawn by the januaryMarkers plugin
+          // (Chart.js drops the January tick at narrow widths — see plugin note).
           grid: {
             tickLength: 0,
-            color: ctx => new Date(ctx.tick.value).getMonth() === 0
-              ? 'rgba(254,252,250,0.18)'
-              : 'rgba(254,252,250,0.06)',
-            lineWidth: ctx => new Date(ctx.tick.value).getMonth() === 0 ? 1.5 : 0.75,
+            color: 'rgba(254,252,250,0.06)',
+            lineWidth: 0.75,
           },
           ticks:  {
             color: 'rgba(254,252,250,0.45)',
             font: { family: 'Roboto', size: 23 },
             maxRotation: 0,
             padding: 12,
-            // Don't let Chart.js auto-skip ticks: on narrow widths it can drop the
-            // January tick, and since only January renders a label the years vanish.
-            // Keeping all quarterly ticks is cheap — non-January labels are blank.
-            autoSkip: false,
-            // Use local month/year so the year label lands on the same tick the grid
-            // highlights as January (grid uses local getMonth()).
-            callback: value => new Date(value).getMonth() === 0 ? String(new Date(value).getFullYear()) : '',
+            // Year labels are drawn by the januaryMarkers plugin; suppress the
+            // built-in tick labels so they can't double-draw or fight the reducer.
+            callback: () => '',
           },
           border: { display: false },
         },
