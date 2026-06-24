@@ -913,9 +913,17 @@ function updateTicker(key, q) {
     `${arrow} ${Math.abs(q.change).toFixed(fmt.dec)} (${Math.abs(q.pct).toFixed(2)}%)`;
 
   const t = parseStamp(q.market_time);
-  asofEl.textContent = 'as of ' +
-    t.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
-    t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const mins = Math.floor((Date.now() - t.getTime()) / 60000);
+  if (mins >= 0 && mins < 60) {
+    // within the last hour → relative, e.g. "refreshed 7 minutes ago"
+    asofEl.textContent = mins < 1
+      ? 'refreshed just now'
+      : `refreshed ${mins} minute${mins === 1 ? '' : 's'} ago`;
+  } else {
+    asofEl.textContent = 'as of ' +
+      t.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
+      t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
 }
 
 function applyLive(live) {
