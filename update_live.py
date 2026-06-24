@@ -5,15 +5,16 @@ Lightweight companion to update_data.py. The dashboard polls live.json to update
 the gold ticker box + sparkline + dot in place.
 
 PRICE SOURCE (front-month ticker + sparkline), in priority order:
-  * OilPriceAPI (https://oilpriceapi.com) if OILPRICE_API_KEY is set — WTI_USD /
-    NATURAL_GAS_USD, refreshed ~every 5 min (fresher than Yahoo's ~15-min exchange
-    delay), email-key signup (no KYC). Free tier is ~20 requests/hour, so we spend
-    exactly ONE call per commodity per cycle, throttle to ~7 min between pulls, and
-    carry prev-close + accumulate the sparkline locally (no extra API calls).
-  * OANDA v20 (real-time CFD) if an OANDA token is configured — WTICO_USD / NATGAS_USD.
-    Kept as a secondary option; requires demo-account KYC, so OilPriceAPI is preferred.
-  * Yahoo Finance (CL=F / NG=F, exchange-DELAYED ~15 min) as the automatic final
-    fallback when nothing else is configured or it errors — the ticker never goes blank.
+  * Yahoo Finance (CL=F / NG=F) — PRIMARY. A 2026-06-24 live-market test found
+    Yahoo's quote consistently ~10 min old vs OilPriceAPI's ~15-20 min, so despite
+    Yahoo's nominal exchange delay it is in practice the fresher source, with no key
+    or rate limit. Self-contained (its own prev-close + intraday spark).
+  * OilPriceAPI (https://oilpriceapi.com) — FALLBACK if OILPRICE_API_KEY is set and
+    Yahoo errors. WTI_USD / NATURAL_GAS_USD, email-key signup (no KYC). Free tier is
+    ~20 requests/hour, so we spend exactly ONE call per commodity per cycle, throttle
+    to ~7 min between pulls, and carry prev-close + accumulate the sparkline locally.
+  * OANDA v20 (real-time CFD) — FALLBACK if an OANDA token is configured. WTICO_USD /
+    NATGAS_USD; requires demo-account KYC. Last-resort before the ticker goes blank.
 
 The FORWARD CURVE overlay (live_curve.json) stays on Yahoo dated contracts — OANDA
 only quotes the front CFD, not the 36-month strip, and the curve barely moves
@@ -371,25 +372,28 @@ def oilprice_quote(key: str, prev: dict) -> dict:
 
 
 def main() -> None:
-    if OILPRICE_KEY:
-        source_label = 'OilPriceAPI (real-time)'
-    elif OANDA_TOKEN:
-        source_label = 'OANDA (real-time)'
-    else:
-        source_label = 'Yahoo (delayed)'
-    print(f"Price source: {source_label}")
+    fallbacks = ', '.join(f for f, on in
+                          (('OilPriceAPI', OILPRICE_KEY), ('OANDA', OANDA_TOKEN)) if on)
+    print(f"Price source: Yahoo (primary)"
+          + (f"; fallbacks: {fallbacks}" if fallbacks else ""))
 
     prev = _read_prev_live()
     now_iso = datetime.now().astimezone().isoformat()
+    # OilPriceAPI is now only a fallback (on Yahoo failure); its throttle still
+    # gates the rare pull so we never blow the free-tier budget.
     fetch_oilprice = bool(OILPRICE_KEY) and oilprice_due(prev)
-    if OILPRICE_KEY and not fetch_oilprice:
-        print(f"OilPriceAPI throttled (<{OILPRICE_MIN_MIN}m since last pull) — carrying last price.")
 
     out = {'generated_at': now_iso}
     pulled_ok = False
     for key, sym in SYMBOLS.items():
         q = None
-        if OILPRICE_KEY:
+        # PRIMARY: Yahoo (per 2026-06-24 test, fresher in practice than OilPriceAPI).
+        try:
+            q = fetch_yahoo(key, sym)
+        except Exception as e:
+            print(f"{key.upper():3} Yahoo error: {e} — trying fallbacks")
+        # FALLBACK 1: OilPriceAPI (only if Yahoo failed).
+        if q is None and OILPRICE_KEY:
             if fetch_oilprice:
                 try:
                     q = oilprice_quote(key, prev)
@@ -398,16 +402,12 @@ def main() -> None:
                     print(f"{key.upper():3} OilPriceAPI error: {e} — falling back")
             elif (prev.get(key) or {}).get('source') == 'oilprice':
                 q = prev[key]                 # within throttle window: reuse last pull
+        # FALLBACK 2: OANDA (only if both above failed).
         if q is None and OANDA_TOKEN:
             try:
                 q = oanda_quote(key)
             except Exception as e:
-                print(f"{key.upper():3} OANDA error: {e} — falling back to Yahoo")
-        if q is None:
-            try:
-                q = fetch_yahoo(key, sym)
-            except Exception as e:
-                print(f"{key.upper():3} {sym}: error {e}")
+                print(f"{key.upper():3} OANDA error: {e}")
         out[key] = q
         if q:
             print(f"{key.upper():3} {q['source']:5}: {q['price']}  "
