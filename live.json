@@ -1,21 +1,27 @@
 {
-  "generated_at": "2026-06-25T04:05:17.157023+00:00",
+  "generated_at": "2026-06-25T04:10:21.399537+00:00",
   "wti": {
-    "price": 69.31,
-    "prev_close": 73.21,
-    "change": -3.9,
-    "pct": -5.33,
-    "market_time": "2026-06-24T23:55:12-04:00",
-    "spark": [],
+    "price": 69.32,
+    "prev_close": 70.34,
+    "change": -1.02,
+    "pct": -1.45,
+    "market_time": "2026-06-25T00:00:05-04:00",
+    "spark": [
+      69.42,
+      69.32
+    ],
     "source": "yahoo"
   },
   "hh": {
-    "price": 3.285,
-    "prev_close": 3.147,
-    "change": 0.138,
-    "pct": 4.39,
-    "market_time": "2026-06-24T23:54:57-04:00",
-    "spark": [],
+    "price": 3.284,
+    "prev_close": 3.221,
+    "change": 0.063,
+    "pct": 1.96,
+    "market_time": "2026-06-25T00:00:06-04:00",
+    "spark": [
+      3.284,
+      3.284
+    ],
     "source": "yahoo"
   },
   "oilprice_pulled_at": "2026-06-24T18:15:18.255392+00:00"
