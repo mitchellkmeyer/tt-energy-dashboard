@@ -506,6 +506,12 @@ function fmtStamp(d) {
 // fresh, so a stale live_curve.json can never regress the chart behind the settle.
 let stripSettledDate = null;
 let strip1dDate = null;   // snapshot date of the previous-trading-day ("1d") curve
+// The settled "Today" snapshot from energy_data.json, stashed so that when the
+// live session advances to a newer trading day (e.g. Monday) we can promote this
+// curve into the "Yesterday" slot — the daily settle job only recomputes the
+// comparison curves once after close, so Yesterday would otherwise lag a session.
+let settledToday = null;  // { date, wti:{date,data}, hh:{date,data} }
+let spotHist = null;      // { wti:[...], hh:[...] } — for the comparison anchor dot
 
 // Parse 'YYYY-MM-DD' to a local-midnight Date (tz-safe — avoids the UTC day-shift
 // of new Date('YYYY-MM-DD')).
@@ -947,11 +953,47 @@ function overlayCurve(chart, c) {
   chart.update('none');
 }
 
+// Build {pts, radii} for a comparison curve, mirroring buildDatasets(): an anchor
+// dot at the snapshot date (spot price that day) followed by the forward points.
+function comparisonCurvePoints(snap, spotHistory) {
+  const pts = [], radii = [];
+  if (snap.date && spotHistory) {
+    const a = getSpotAtDate(spotHistory, snap.date);
+    if (a !== null) { pts.push({ x: new Date(snap.date + 'T12:00:00'), y: a }); radii.push(5); }
+  }
+  snap.data.forEach(d => {
+    pts.push({ x: new Date(d.delivery + '-01T12:00:00'), y: d.price });
+    radii.push(0);
+  });
+  return { pts, radii };
+}
+
+// Promote the stashed settled "Today" curve into the "Yesterday"/1d slot. Called
+// when the live session is a newer trading day than the settled snapshot, so the
+// most recent completed session shows as Yesterday instead of the (now two-back)
+// daily-computed 1d curve. Idempotent: always rebuilds 1d from the stash.
+function promoteSettledToYesterday() {
+  if (!settledToday) return;
+  strip1dDate = settledToday.date;
+  [['wti', wtiChart], ['hh', hhChart]].forEach(([key, ch]) => {
+    const ds = ch?.data.datasets.find(d => d._curveKey === '1d');
+    const snap = settledToday[key];
+    if (!ds || !snap?.data?.length) return;
+    const { pts, radii } = comparisonCurvePoints(snap, spotHist?.[key]);
+    ds.data = pts;
+    ds.pointRadius = radii;
+  });
+}
+
 function applyLiveCurve(curve) {
   if (!curve) return;
   // Don't let a stale live_curve.json regress the chart behind the settled snapshot.
   const cDate = curve.wti?.date || curve.hh?.date;
   if (!cDate || (stripSettledDate && cDate < stripSettledDate)) return;
+  // Live session is a newer trading day than the settle → the settled "Today"
+  // curve is really the latest completed session; move it into "Yesterday" so it
+  // doesn't sit a session behind while the live overlay advances "Today".
+  if (stripSettledDate && cDate > stripSettledDate) promoteSettledToYesterday();
   applyStripDate(cDate);                  // relabel first so overlayCurve picks up the new label
   applyPrevDayLabel(cDate, strip1dDate);  // "Yesterday" vs weekday is relative to the live today
   [wtiChart, hhChart].forEach(ch => {
@@ -993,6 +1035,12 @@ async function init() {
     strip1dDate      = data.wti?.curves?.['1d']?.date || data.hh?.curves?.['1d']?.date || null;
     applyStripDate(stripSettledDate);
     applyPrevDayLabel(stripSettledDate, strip1dDate);
+
+    // Stash the settled "Today" curve + spot history so applyLiveCurve can promote
+    // it to "Yesterday" once the live session advances past the settle date.
+    settledToday = { date: stripSettledDate,
+                     wti: data.wti?.curves?.today, hh: data.hh?.curves?.today };
+    spotHist     = { wti: data.wti?.spot_history || [], hh: data.hh?.spot_history || [] };
 
     const wtiData = [liveDotDataset(), ...buildDatasets(data.wti)];
     const hhData  = [liveDotDataset(), ...buildDatasets(data.hh)];
