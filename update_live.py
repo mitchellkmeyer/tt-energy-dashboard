@@ -4,26 +4,18 @@ Live front-month price updater — writes live.json for the dashboard ticker.
 Lightweight companion to update_data.py. The dashboard polls live.json to update
 the gold ticker box + sparkline + dot in place.
 
-PRICE SOURCE (front-month ticker + sparkline), in priority order:
-  * Yahoo Finance (CL=F / NG=F) — PRIMARY. A 2026-06-24 live-market test found
-    Yahoo's quote consistently ~10 min old vs OilPriceAPI's ~15-20 min, so despite
-    Yahoo's nominal exchange delay it is in practice the fresher source, with no key
-    or rate limit. Self-contained (its own prev-close + intraday spark).
-  * OilPriceAPI (https://oilpriceapi.com) — FALLBACK if OILPRICE_API_KEY is set and
-    Yahoo errors. WTI_USD / NATURAL_GAS_USD, email-key signup (no KYC). Free tier is
-    ~20 requests/hour, so we spend exactly ONE call per commodity per cycle, throttle
-    to ~7 min between pulls, and carry prev-close + accumulate the sparkline locally.
-  * OANDA v20 (real-time CFD) — FALLBACK if an OANDA token is configured. WTICO_USD /
-    NATGAS_USD; requires demo-account KYC. Last-resort before the ticker goes blank.
+PRICE SOURCE: Yahoo Finance (CL=F / NG=F) for the front-month ticker + sparkline.
+A 2026-06-24 live-market test found Yahoo's quote consistently ~10 min old vs the
+OilPriceAPI/OANDA alternatives' ~15-20 min, so despite Yahoo's nominal exchange
+delay it was in practice the fresher source — with no key or rate limit. Those
+alternatives were removed 2026-06-30; Yahoo is now the sole source.
 
-The FORWARD CURVE overlay (live_curve.json) stays on Yahoo dated contracts — OANDA
-only quotes the front CFD, not the 36-month strip, and the curve barely moves
-intraday so the delay is immaterial there.
+The FORWARD CURVE overlay (live_curve.json) also comes from Yahoo, using the dated
+.NYM contract symbols.
 """
-import os
 import json
 import requests
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 from pathlib import Path
 
@@ -34,35 +26,6 @@ ET  = ZoneInfo('America/New_York')          # NYMEX exchange timezone
 
 SYMBOLS = {'wti': 'CL=F', 'hh': 'NG=F'}
 UA = {'User-Agent': 'Mozilla/5.0'}
-
-
-# ── OANDA real-time config ────────────────────────────────────────────────────
-def _secret(env_name: str, fname: str) -> str:
-    """Read a secret from an env var (CI) or a git-ignored local file (manual run)."""
-    v = os.environ.get(env_name, '').strip()
-    if v:
-        return v
-    p = DIR / fname
-    return p.read_text(encoding='utf-8').strip() if p.exists() else ''
-
-OANDA_TOKEN   = _secret('OANDA_TOKEN', 'oanda_token.txt')
-OANDA_ACCOUNT = _secret('OANDA_ACCOUNT', 'oanda_account.txt')   # optional — auto-resolved if blank
-# Personal-access tokens from a *demo* (practice) account use the practice host;
-# a funded live account uses api-fxtrade. Default to practice (free).
-OANDA_HOST = ('https://api-fxtrade.oanda.com'
-              if os.environ.get('OANDA_ENV', 'practice').lower() == 'live'
-              else 'https://api-fxpractice.oanda.com')
-OANDA_INSTR = {'wti': 'WTICO_USD', 'hh': 'NATGAS_USD'}
-
-# ── OilPriceAPI real-time config (preferred front-month source) ────────────────
-OILPRICE_KEY  = _secret('OILPRICE_API_KEY', 'oilprice_key.txt')
-OILPRICE_HOST = 'https://api.oilpriceapi.com'
-OILPRICE_CODE = {'wti': 'WTI_USD', 'hh': 'NATURAL_GAS_USD'}
-# Free tier ≈ 20 req/hr. We make 1 call per commodity per pull, so pull at most
-# every OILPRICE_MIN_MIN minutes (≈17 calls/hr for 2 commodities) — comfortably
-# under the cap even with a 5-min external cron poking the workflow.
-OILPRICE_MIN_MIN = 7
-SPARK_MAX        = 160   # cap the locally-accumulated sparkline length
 
 # Full-strip (live forward curve) config. The strip is ~36 dated contracts per
 # commodity, so it's far heavier than the 2-call front-month pull — we throttle
@@ -129,6 +92,18 @@ def fetch_intraday(symbol: str) -> list:
     res    = r.json()['chart']['result'][0]
     closes = res['indicators']['quote'][0].get('close', []) or []
     return [round(float(c), 4) for c in closes if c is not None]
+
+
+def fetch_front_month(key: str, sym: str) -> dict:
+    """Front-month quote + intraday spark for one commodity, from Yahoo."""
+    q = fetch_quote(sym)
+    try:
+        q['spark'] = fetch_intraday(sym)
+    except Exception as se:
+        q['spark'] = []
+        print(f"{key.upper():3} {sym}: spark error {se}")
+    q['source'] = 'yahoo'
+    return q
 
 
 def add_months(d: date, n: int) -> date:
@@ -213,211 +188,20 @@ def update_live_curve() -> None:
     print(f"Written -> {CURVE_OUT}")
 
 
-# ── OANDA real-time front-month (CFD) ─────────────────────────────────────────
-_OANDA_ACCT_CACHE = None
-
-
-def _oanda_headers() -> dict:
-    return {'Authorization': f'Bearer {OANDA_TOKEN}'}
-
-
-def oanda_account_id() -> str:
-    """Resolve the account id from the token (so only OANDA_TOKEN must be set)."""
-    global _OANDA_ACCT_CACHE
-    if OANDA_ACCOUNT:
-        return OANDA_ACCOUNT
-    if _OANDA_ACCT_CACHE:
-        return _OANDA_ACCT_CACHE
-    r = requests.get(f'{OANDA_HOST}/v3/accounts', headers=_oanda_headers(), timeout=20)
-    r.raise_for_status()
-    _OANDA_ACCT_CACHE = r.json()['accounts'][0]['id']
-    return _OANDA_ACCT_CACHE
-
-
-def _norm_time(s: str) -> str:
-    """OANDA RFC3339 (up to 9 fractional digits + 'Z') -> JS-parseable ISO (UTC)."""
-    s = s.rstrip('Z').split('.')[0]
-    return datetime.fromisoformat(s).replace(tzinfo=timezone.utc).isoformat()
-
-
-def _oanda_candles(instrument: str, **params) -> list:
-    url = f'{OANDA_HOST}/v3/instruments/{instrument}/candles'
-    r = requests.get(url, params={'price': 'M', **params}, headers=_oanda_headers(), timeout=20)
-    r.raise_for_status()
-    return r.json().get('candles', [])
-
-
-def oanda_quote(key: str) -> dict:
-    """Real-time CFD quote + intraday spark for one commodity, from OANDA."""
-    instrument = OANDA_INSTR[key]
-    acct = oanda_account_id()
-
-    # Current price (mid of bid/ask).
-    r = requests.get(f'{OANDA_HOST}/v3/accounts/{acct}/pricing',
-                     params={'instruments': instrument}, headers=_oanda_headers(), timeout=20)
-    r.raise_for_status()
-    p     = r.json()['prices'][0]
-    bid   = float(p['bids'][0]['price'])
-    ask   = float(p['asks'][0]['price'])
-    price = (bid + ask) / 2
-
-    # Previous trading day's close = last *completed* daily candle.
-    daily = [c for c in _oanda_candles(instrument, granularity='D', count=3) if c.get('complete')]
-    prev_close = float(daily[-1]['mid']['c']) if daily else price
-
-    # Today's intraday 5-min closes for the sparkline (from start of the ET day).
-    et_midnight = datetime.now(ET).replace(hour=0, minute=0, second=0, microsecond=0)
-    frm = et_midnight.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
-    spark = [round(float(c['mid']['c']), 4)
-             for c in _oanda_candles(instrument, granularity='M5', **{'from': frm})
-             if c.get('complete')]
-
-    change = price - prev_close
-    pct    = (change / prev_close * 100) if prev_close else 0.0
-    return {
-        'price':       round(price, 4),
-        'prev_close':  round(prev_close, 4),
-        'change':      round(change, 4),
-        'pct':         round(pct, 2),
-        'market_time': _norm_time(p['time']),
-        'spark':       spark,
-        'source':      'oanda',
-    }
-
-
-def fetch_yahoo(key: str, sym: str) -> dict:
-    """Delayed Yahoo fallback (front-month future + intraday spark)."""
-    q = fetch_quote(sym)
-    try:
-        q['spark'] = fetch_intraday(sym)
-    except Exception as se:
-        q['spark'] = []
-        print(f"{key.upper():3} {sym}: spark error {se}")
-    q['source'] = 'yahoo'
-    return q
-
-
-# ── OilPriceAPI real-time front-month ─────────────────────────────────────────
-def _read_prev_live() -> dict:
-    """Previous live.json — carries prev_close + the accumulated spark between runs."""
-    if OUT.exists():
-        try:
-            return json.loads(OUT.read_text(encoding='utf-8'))
-        except Exception:
-            return {}
-    return {}
-
-
-def oilprice_due(prev: dict) -> bool:
-    """True if >= OILPRICE_MIN_MIN has passed since the last *actual* OilPriceAPI pull.
-
-    Gated on a dedicated `oilprice_pulled_at` stamp — NOT generated_at, which every
-    run rewrites (that would throttle forever after the first pull). Absent stamp
-    (cold start / source just switched on) -> due, so the first pull always fires.
-    """
-    ts = (prev or {}).get('oilprice_pulled_at')
-    if not ts:
-        return True
-    try:
-        age = (datetime.now().astimezone() - datetime.fromisoformat(ts)).total_seconds() / 60
-        return age >= OILPRICE_MIN_MIN
-    except Exception:
-        return True
-
-
-def oilprice_quote(key: str, prev: dict) -> dict:
-    """Live price from OilPriceAPI (1 call); prev_close + spark kept locally.
-
-    Free tier is tight, so this spends exactly one request (the latest price). The
-    previous close is carried forward from the prior run (same source, no extra
-    call); the sparkline is built by appending each poll and resets at the ET day
-    rollover — keeping the whole front-month pull at 1 API call per commodity.
-    """
-    code = OILPRICE_CODE[key]
-    r = requests.get(f'{OILPRICE_HOST}/v1/prices/latest', params={'by_code': code},
-                     headers={'Authorization': f'Token {OILPRICE_KEY}'}, timeout=20)
-    r.raise_for_status()
-    d = r.json()
-    d = d.get('data', d)                      # API wraps the payload in "data"
-    price = float(d['price'])
-    created = d.get('created_at') or d.get('created')
-    market_time = created or datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
-    today = datetime.now(ET).date().isoformat()
-
-    # Carry prev_close + spark from the prior run; reset both at a new trading day.
-    prior = (prev or {}).get(key) or {}
-    is_oilprice = prior.get('source') == 'oilprice'
-    if is_oilprice and prior.get('day') == today:
-        prev_close = float(prior.get('prev_close', price))
-        spark = list(prior.get('spark', []))
-    else:
-        # New day -> yesterday's last observed price becomes today's reference close.
-        prev_close = float(prior.get('price', price)) if is_oilprice else price
-        spark = []
-    spark.append(round(price, 4))
-    spark = spark[-SPARK_MAX:]
-
-    change = price - prev_close
-    pct    = (change / prev_close * 100) if prev_close else 0.0
-    return {
-        'price':       round(price, 4),
-        'prev_close':  round(prev_close, 4),
-        'change':      round(change, 4),
-        'pct':         round(pct, 2),
-        'market_time': market_time,
-        'spark':       spark,
-        'day':         today,
-        'source':      'oilprice',
-    }
-
-
 def main() -> None:
-    fallbacks = ', '.join(f for f, on in
-                          (('OilPriceAPI', OILPRICE_KEY), ('OANDA', OANDA_TOKEN)) if on)
-    print(f"Price source: Yahoo (primary)"
-          + (f"; fallbacks: {fallbacks}" if fallbacks else ""))
-
-    prev = _read_prev_live()
-    now_iso = datetime.now().astimezone().isoformat()
-    # OilPriceAPI is now only a fallback (on Yahoo failure); its throttle still
-    # gates the rare pull so we never blow the free-tier budget.
-    fetch_oilprice = bool(OILPRICE_KEY) and oilprice_due(prev)
-
-    out = {'generated_at': now_iso}
-    pulled_ok = False
+    print("Price source: Yahoo")
+    out = {'generated_at': datetime.now().astimezone().isoformat()}
     for key, sym in SYMBOLS.items():
-        q = None
-        # PRIMARY: Yahoo (per 2026-06-24 test, fresher in practice than OilPriceAPI).
         try:
-            q = fetch_yahoo(key, sym)
+            q = fetch_front_month(key, sym)
         except Exception as e:
-            print(f"{key.upper():3} Yahoo error: {e} — trying fallbacks")
-        # FALLBACK 1: OilPriceAPI (only if Yahoo failed).
-        if q is None and OILPRICE_KEY:
-            if fetch_oilprice:
-                try:
-                    q = oilprice_quote(key, prev)
-                    pulled_ok = True
-                except Exception as e:
-                    print(f"{key.upper():3} OilPriceAPI error: {e} — falling back")
-            elif (prev.get(key) or {}).get('source') == 'oilprice':
-                q = prev[key]                 # within throttle window: reuse last pull
-        # FALLBACK 2: OANDA (only if both above failed).
-        if q is None and OANDA_TOKEN:
-            try:
-                q = oanda_quote(key)
-            except Exception as e:
-                print(f"{key.upper():3} OANDA error: {e}")
+            print(f"{key.upper():3} Yahoo error: {e}")
+            q = None
         out[key] = q
         if q:
             print(f"{key.upper():3} {q['source']:5}: {q['price']}  "
                   f"({q['change']:+} / {q['pct']:+}%)  {len(q['spark'])} pts  "
                   f"as of {q['market_time']}")
-
-    # Throttle clock advances only on a *successful* pull; a failed/throttled run
-    # keeps the prior stamp so the next run is due to retry rather than blocked.
-    if OILPRICE_KEY:
-        out['oilprice_pulled_at'] = now_iso if pulled_ok else prev.get('oilprice_pulled_at')
 
     OUT.write_text(json.dumps(out, indent=2), encoding='utf-8')
     print(f"Written -> {OUT}")

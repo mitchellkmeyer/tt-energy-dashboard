@@ -1,8 +1,5 @@
 # Secrets — never commit
 eia_key.txt
-oanda_token.txt
-oanda_account.txt
-oilprice_key.txt
 
 # Local Windows automation (laptop-specific paths/usernames)
 *.bat

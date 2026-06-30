@@ -34,13 +34,6 @@ jobs:
         run: pip install requests tzdata
 
       - name: Fetch live front-month prices
-        env:
-          # Optional real-time sources, in priority order. When OILPRICE_API_KEY is
-          # set, the ticker pulls fresher OilPriceAPI prices instead of delayed Yahoo.
-          # OANDA is a secondary option. Absent/empty -> automatic Yahoo fallback.
-          OILPRICE_API_KEY: ${{ secrets.OILPRICE_API_KEY }}
-          OANDA_TOKEN:      ${{ secrets.OANDA_TOKEN }}
-          OANDA_ACCOUNT:    ${{ secrets.OANDA_ACCOUNT }}
         run: python update_live.py
 
       - name: Commit live data (only if changed)
