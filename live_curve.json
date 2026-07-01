@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-07-01T00:30:30.690887+00:00",
+  "generated_at": "2026-07-01T00:55:13.321428+00:00",
   "wti": {
     "date": "2026-06-30",
     "data": [
       {
         "delivery": "2026-08",
-        "price": 70.11
+        "price": 70.04
       },
       {
         "delivery": "2026-09",
-        "price": 69.86
+        "price": 69.81
       },
       {
         "delivery": "2026-10",
@@ -17,7 +17,7 @@
       },
       {
         "delivery": "2026-11",
-        "price": 69.17
+        "price": 69.11
       },
       {
         "delivery": "2026-12",
@@ -45,7 +45,7 @@
       },
       {
         "delivery": "2027-06",
-        "price": 66.97
+        "price": 67.01
       },
       {
         "delivery": "2027-07",
@@ -69,7 +69,7 @@
       },
       {
         "delivery": "2027-12",
-        "price": 66.08
+        "price": 66.06
       },
       {
         "delivery": "2028-01",
@@ -117,7 +117,7 @@
       },
       {
         "delivery": "2028-12",
-        "price": 65.04
+        "price": 65.05
       },
       {
         "delivery": "2029-01",
@@ -142,39 +142,39 @@
     "data": [
       {
         "delivery": "2026-08",
-        "price": 3.251
+        "price": 3.248
       },
       {
         "delivery": "2026-09",
-        "price": 3.174
+        "price": 3.168
       },
       {
         "delivery": "2026-10",
-        "price": 3.191
+        "price": 3.187
       },
       {
         "delivery": "2026-11",
-        "price": 3.375
+        "price": 3.367
       },
       {
         "delivery": "2026-12",
-        "price": 3.967
+        "price": 3.96
       },
       {
         "delivery": "2027-01",
-        "price": 4.378
+        "price": 4.372
       },
       {
         "delivery": "2027-02",
-        "price": 3.95
+        "price": 3.943
       },
       {
         "delivery": "2027-03",
-        "price": 3.149
+        "price": 3.147
       },
       {
         "delivery": "2027-04",
-        "price": 2.944
+        "price": 2.937
       },
       {
         "delivery": "2027-05",
