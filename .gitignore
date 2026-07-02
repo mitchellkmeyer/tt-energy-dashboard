@@ -1,6 +1,9 @@
 # Secrets — never commit
 eia_key.txt
 
+# Raw ComboCurve exports (source data — keep out of the public repo)
+*.xlsx
+
 # Local Windows automation (laptop-specific paths/usernames)
 *.bat
 update_log.txt
