@@ -43,8 +43,23 @@ jobs:
           git add live.json live_curve.json
           if git diff --staged --quiet; then
             echo "No live price change."
-          else
-            git commit -m "Live prices $(date -u +%H:%M) UTC"
-            git pull --rebase --autostash origin main || true
-            git push
+            exit 0
           fi
+          git commit -m "Live prices $(date -u +%H:%M) UTC"
+          # The scheduled cron and the external 5-min cron can fire overlapping live
+          # runs that BOTH rewrite live.json / live_curve.json. A plain rebase then
+          # hits a content conflict and dies in detached-HEAD. These files are fully
+          # regenerated each run, so on conflict just keep OUR fresh values (in a
+          # rebase the commit being replayed is "theirs"), and retry to ride out the
+          # race where another run pushes between our rebase and push.
+          for i in 1 2 3 4 5; do
+            if git pull --rebase -X theirs origin main && git push; then
+              echo "pushed on attempt $i"
+              exit 0
+            fi
+            echo "attempt $i lost a push race — retrying"
+            git rebase --abort 2>/dev/null || true
+            sleep $((RANDOM % 4 + 2))
+          done
+          echo "still failing after 5 attempts"
+          exit 1
