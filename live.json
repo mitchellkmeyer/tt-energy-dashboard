@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-05T17:20:32.479557+00:00",
+  "generated_at": "2026-07-05T17:25:12.348576+00:00",
   "wti": {
     "price": 68.78,
     "prev_close": 68.69,
@@ -10,10 +10,10 @@
     "source": "yahoo"
   },
   "hh": {
-    "price": 3.245,
+    "price": 3.196,
     "prev_close": 3.196,
-    "change": 0.049,
-    "pct": 1.53,
+    "change": -0.0,
+    "pct": -0.0,
     "market_time": "2026-07-03T12:59:58-04:00",
     "spark": [],
     "source": "yahoo"
