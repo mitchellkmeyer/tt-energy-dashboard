@@ -725,7 +725,7 @@ const januaryMarkers = {
           ctx.stroke();
           if (isJan) {
             ctx.fillStyle = 'rgba(254,252,250,0.45)';
-            ctx.fillText(String(d.getFullYear()), px, area.bottom + 12);
+            ctx.fillText(String(d.getFullYear()), px, area.bottom + 18);
           }
         }
       }
@@ -754,7 +754,7 @@ function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
       maintainAspectRatio: false,
       animation: false,
       // reserve room below the plot for the plugin-drawn year labels
-      layout: { padding: { bottom: 30 } },
+      layout: { padding: { bottom: 40 } },
       plugins: {
         legend: { display: false },
         tooltip: {
