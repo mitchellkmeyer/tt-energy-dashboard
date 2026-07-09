@@ -740,7 +740,7 @@ function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
   const yScale = {
     min:    0,
     grid:   { color: 'rgba(254,252,250,0.06)', tickLength: 0 },
-    ticks:  { color: 'rgba(254,252,250,0.45)', font: { family: 'Roboto', size: 23 }, callback: v => fmtPrice(v) },
+    ticks:  { color: 'rgba(254,252,250,0.45)', font: { family: 'Roboto', size: 23 }, padding: 12, callback: v => fmtPrice(v) },
     border: { display: false },
   };
   if (yMax !== null) yScale.max = yMax;
