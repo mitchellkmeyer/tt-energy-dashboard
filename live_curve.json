@@ -1,27 +1,27 @@
 {
-  "generated_at": "2026-08-04T05:15:28.450173+00:00",
+  "generated_at": "2026-08-04T05:40:22.891249+00:00",
   "wti": {
     "date": "2026-08-04",
     "data": [
       {
         "delivery": "2026-09",
-        "price": 81.18
+        "price": 81.37
       },
       {
         "delivery": "2026-10",
-        "price": 78.86
+        "price": 78.98
       },
       {
         "delivery": "2026-11",
-        "price": 76.58
+        "price": 76.7
       },
       {
         "delivery": "2026-12",
-        "price": 74.77
+        "price": 74.88
       },
       {
         "delivery": "2027-01",
-        "price": 73.57
+        "price": 73.55
       },
       {
         "delivery": "2027-02",
@@ -29,11 +29,11 @@
       },
       {
         "delivery": "2027-03",
-        "price": 71.9
+        "price": 72.0
       },
       {
         "delivery": "2027-04",
-        "price": 71.24
+        "price": 71.42
       },
       {
         "delivery": "2027-05",
@@ -41,7 +41,7 @@
       },
       {
         "delivery": "2027-06",
-        "price": 70.46
+        "price": 70.45
       },
       {
         "delivery": "2027-07",
@@ -150,31 +150,31 @@
     "data": [
       {
         "delivery": "2026-09",
-        "price": 2.773
+        "price": 2.78
       },
       {
         "delivery": "2026-10",
-        "price": 2.816
+        "price": 2.823
       },
       {
         "delivery": "2026-11",
-        "price": 3.043
+        "price": 3.048
       },
       {
         "delivery": "2026-12",
-        "price": 3.722
+        "price": 3.728
       },
       {
         "delivery": "2027-01",
-        "price": 4.197
+        "price": 4.205
       },
       {
         "delivery": "2027-02",
-        "price": 3.818
+        "price": 3.823
       },
       {
         "delivery": "2027-03",
-        "price": 2.994
+        "price": 3.0
       },
       {
         "delivery": "2027-04",
@@ -190,7 +190,7 @@
       },
       {
         "delivery": "2027-07",
-        "price": 3.2
+        "price": 3.199
       },
       {
         "delivery": "2027-08",
