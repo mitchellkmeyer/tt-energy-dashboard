@@ -1,39 +1,39 @@
 {
-  "generated_at": "2026-08-07T13:35:21.786227+00:00",
+  "generated_at": "2026-08-07T14:00:20.244845+00:00",
   "wti": {
     "date": "2026-08-07",
     "data": [
       {
         "delivery": "2026-09",
-        "price": 77.04
+        "price": 77.26
       },
       {
         "delivery": "2026-10",
-        "price": 75.85
+        "price": 76.06
       },
       {
         "delivery": "2026-11",
-        "price": 74.61
+        "price": 74.81
       },
       {
         "delivery": "2026-12",
-        "price": 73.37
+        "price": 73.5
       },
       {
         "delivery": "2027-01",
-        "price": 72.36
+        "price": 72.42
       },
       {
         "delivery": "2027-02",
-        "price": 71.5
+        "price": 71.55
       },
       {
         "delivery": "2027-03",
-        "price": 70.87
+        "price": 70.85
       },
       {
         "delivery": "2027-04",
-        "price": 70.27
+        "price": 70.3
       },
       {
         "delivery": "2027-05",
@@ -41,7 +41,7 @@
       },
       {
         "delivery": "2027-06",
-        "price": 69.51
+        "price": 69.44
       },
       {
         "delivery": "2027-07",
@@ -53,7 +53,7 @@
       },
       {
         "delivery": "2027-09",
-        "price": 68.46
+        "price": 68.44
       },
       {
         "delivery": "2027-10",
@@ -65,7 +65,7 @@
       },
       {
         "delivery": "2027-12",
-        "price": 67.83
+        "price": 67.7
       },
       {
         "delivery": "2028-01",
@@ -89,7 +89,7 @@
       },
       {
         "delivery": "2028-06",
-        "price": 66.72
+        "price": 66.55
       },
       {
         "delivery": "2028-07",
@@ -113,7 +113,7 @@
       },
       {
         "delivery": "2028-12",
-        "price": 65.92
+        "price": 65.72
       },
       {
         "delivery": "2029-01",
@@ -150,83 +150,83 @@
     "data": [
       {
         "delivery": "2026-09",
-        "price": 2.684
+        "price": 2.686
       },
       {
         "delivery": "2026-10",
-        "price": 2.732
+        "price": 2.738
       },
       {
         "delivery": "2026-11",
-        "price": 2.959
+        "price": 2.97
       },
       {
         "delivery": "2026-12",
-        "price": 3.581
+        "price": 3.593
       },
       {
         "delivery": "2027-01",
-        "price": 4.017
+        "price": 4.028
       },
       {
         "delivery": "2027-02",
-        "price": 3.67
+        "price": 3.68
       },
       {
         "delivery": "2027-03",
-        "price": 2.922
+        "price": 2.933
       },
       {
         "delivery": "2027-04",
-        "price": 2.799
-      },
-      {
-        "delivery": "2027-05",
         "price": 2.81
       },
       {
+        "delivery": "2027-05",
+        "price": 2.822
+      },
+      {
         "delivery": "2027-06",
-        "price": 2.947
+        "price": 2.962
       },
       {
         "delivery": "2027-07",
-        "price": 3.153
+        "price": 3.168
       },
       {
         "delivery": "2027-08",
-        "price": 3.218
+        "price": 3.233
       },
       {
         "delivery": "2027-09",
-        "price": 3.196
+        "price": 3.211
       },
       {
         "delivery": "2027-10",
-        "price": 3.268
+        "price": 3.283
       },
       {
         "delivery": "2027-11",
-        "price": 3.519
+        "price": 3.53
       },
       {
         "delivery": "2027-12",
-        "price": 4.179
+        "price": 4.188
       },
       {
         "delivery": "2028-01",
-        "price": 4.624
+        "price": 4.631
       },
       {
         "delivery": "2028-02",
-        "price": 4.192
+        "price": 4.199
       },
       {
         "delivery": "2028-03",
-        "price": 3.413
+        "price": 3.417
       },
       {
         "delivery": "2028-04",
-        "price": 3.14
+        "price": 3.143
       },
       {
         "delivery": "2028-05",
@@ -258,7 +258,7 @@
       },
       {
         "delivery": "2028-12",
-        "price": 4.349
+        "price": 4.35
       },
       {
         "delivery": "2029-01",
