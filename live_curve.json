@@ -1,35 +1,35 @@
 {
-  "generated_at": "2026-08-07T05:00:20.827619+00:00",
+  "generated_at": "2026-08-07T05:25:13.660058+00:00",
   "wti": {
     "date": "2026-08-07",
     "data": [
       {
         "delivery": "2026-09",
-        "price": 78.38
+        "price": 78.32
       },
       {
         "delivery": "2026-10",
-        "price": 77.26
+        "price": 77.07
       },
       {
         "delivery": "2026-11",
-        "price": 75.85
+        "price": 75.72
       },
       {
         "delivery": "2026-12",
-        "price": 74.39
+        "price": 74.28
       },
       {
         "delivery": "2027-01",
-        "price": 73.2
+        "price": 73.12
       },
       {
         "delivery": "2027-02",
-        "price": 72.28
+        "price": 72.19
       },
       {
         "delivery": "2027-03",
-        "price": 71.77
+        "price": 71.44
       },
       {
         "delivery": "2027-04",
@@ -41,7 +41,7 @@
       },
       {
         "delivery": "2027-06",
-        "price": 70.08
+        "price": 69.99
       },
       {
         "delivery": "2027-07",
@@ -65,7 +65,7 @@
       },
       {
         "delivery": "2027-12",
-        "price": 68.16
+        "price": 68.14
       },
       {
         "delivery": "2028-01",
@@ -150,19 +150,19 @@
     "data": [
       {
         "delivery": "2026-09",
-        "price": 2.637
+        "price": 2.645
       },
       {
         "delivery": "2026-10",
-        "price": 2.688
+        "price": 2.696
       },
       {
         "delivery": "2026-11",
-        "price": 2.92
+        "price": 2.923
       },
       {
         "delivery": "2026-12",
-        "price": 3.541
+        "price": 3.545
       },
       {
         "delivery": "2027-01",
@@ -178,7 +178,7 @@
       },
       {
         "delivery": "2027-04",
-        "price": 2.775
+        "price": 2.779
       },
       {
         "delivery": "2027-05",
@@ -190,7 +190,7 @@
       },
       {
         "delivery": "2027-07",
-        "price": 3.129
+        "price": 3.143
       },
       {
         "delivery": "2027-08",
