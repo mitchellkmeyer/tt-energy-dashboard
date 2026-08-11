@@ -96,6 +96,10 @@
       border-radius: 10px;
       padding: 16px 20px 12px;
       min-height: 0;
+      min-width: 0;   /* flex items default to min-width:auto, which floors this at the
+                          canvas's last-rendered pixel width instead of letting it shrink —
+                          that's what was pushing the Henry Hub panel off-screen and clipping
+                          it (overflow:hidden on body) on narrower windows */
     }
 
     .chart-title {
@@ -191,6 +195,7 @@
     .canvas-wrap {
       flex: 1;
       min-height: 0;
+      min-width: 0;
       position: relative;
     }
 
@@ -285,6 +290,40 @@
       z-index: 100;
       text-align: center;
       padding: 40px;
+    }
+
+    /* ── Narrow desktop / laptop windows ───────────────────────────────────── */
+    /* Between the mobile breakpoint and ~1300px: keep the wide two-panel "TV"
+       layout (side-by-side charts, no vertical stack) but scale text/padding
+       down so nothing overlaps or gets clipped by the fixed overflow:hidden
+       body. Canvas-drawn chart text (axis/tooltip/plugin fonts) scales via
+       CHART_FONT_SCALE in the script below — CSS can't reach into <canvas>. */
+    @media (min-width: 821px) and (max-width: 1300px) {
+      body { padding: 14px 18px 12px; gap: 10px; }
+      .charts { gap: 12px; }
+      .chart-panel { padding: 12px 16px 10px; }
+
+      /* Same fix mobile already uses: the ticker box won't compress below its
+         own content size, so let it drop to its own line under the title
+         instead of the two fighting over one row (which was forcing the
+         title's flex item to near-zero width and wrapping into the ticker). */
+      .chart-title { font-size: 1.9rem; flex-wrap: wrap; gap: 6px 12px; }
+      .chart-unit  { font-size: 1.3rem; }
+      .ticker-wrap { flex-shrink: 0; }
+
+      .ticker        { padding: 3px 11px; gap: 10px; }
+      .ticker-spark  { width: 58px; height: 30px; }
+      .ticker-price  { font-size: 1.45rem; }
+      .ticker-change { font-size: 1.05rem; }
+      .ticker-asof   { font-size: 0.88rem; }
+
+      .legend      { flex-wrap: wrap; gap: 8px 22px; }
+      .legend-item { font-size: 1.1rem; white-space: nowrap; }
+
+      .clock-date { font-size: 1rem; }
+      .clock-time { font-size: 1.8rem; }
+
+      .header-meta { font-size: 1.05rem; }
     }
 
     /* ── Mobile / narrow screens ─────────────────────────────────────────────── */
@@ -589,13 +628,50 @@ const todayLinePlugin = {
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(254,252,250,0.35)';
-    ctx.font = '500 18px Roboto, sans-serif';
+    ctx.font = `500 ${Math.round(18 * CHART_FONT_SCALE)}px Roboto, sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillText('TODAY', px, top + 16);
     ctx.restore();
   },
 };
 Chart.register(todayLinePlugin);
+
+// ── Responsive canvas font scaling ─────────────────────────────────────────────
+// Chart.js resizes the canvas itself, but tick/tooltip/plugin font sizes below
+// are plain pixel values baked into chart options — they don't shrink on their
+// own, which is why axis labels started overlapping once the wide two-panel
+// layout got squeezed into a narrower-than-TV desktop window. Scale them down
+// smoothly between the mobile breakpoint (820px, where the layout switches to
+// a full-width single column and doesn't need this) and ~1300px.
+function chartFontScale() {
+  const w = window.innerWidth;
+  if (w <= 820 || w >= 1300) return 1;
+  return 0.68 + (w - 820) / (1300 - 820) * 0.32;
+}
+let CHART_FONT_SCALE = chartFontScale();
+
+// Re-applies the scale to already-built charts (initial creation picks it up
+// directly via tickPx in createChart). wtiChart/hhChart aren't assigned until
+// init() runs, but this is only ever invoked later from the resize listener,
+// by which point they exist.
+function applyChartFontScale() {
+  CHART_FONT_SCALE = chartFontScale();
+  const px = Math.round(23 * CHART_FONT_SCALE);
+  [wtiChart, hhChart].forEach(ch => {
+    if (!ch) return;
+    ch.options.scales.x.ticks.font.size = px;
+    ch.options.scales.y.ticks.font.size = px;
+    ch.options.plugins.tooltip.titleFont.size = px;
+    ch.options.plugins.tooltip.bodyFont.size = px;
+    ch.update('none');
+  });
+}
+
+let _fontScaleResizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_fontScaleResizeTimer);
+  _fontScaleResizeTimer = setTimeout(applyChartFontScale, 150);
+});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getSpotAtDate(spotHistory, dateStr) {
@@ -710,7 +786,7 @@ const januaryMarkers = {
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.font = '400 23px Roboto';
+    ctx.font = `400 ${Math.round(23 * CHART_FONT_SCALE)}px Roboto`;
     while (d.getTime() <= x.max) {
       const t = d.getTime();
       if (t >= x.min) {
@@ -737,10 +813,11 @@ const januaryMarkers = {
 
 // ── Create chart ──────────────────────────────────────────────────────────────
 function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
+  const tickPx = Math.round(23 * CHART_FONT_SCALE);
   const yScale = {
     min:    0,
     grid:   { color: 'rgba(254,252,250,0.06)', tickLength: 0 },
-    ticks:  { color: 'rgba(254,252,250,0.45)', font: { family: 'Roboto', size: 23 }, padding: 12, callback: v => fmtPrice(v) },
+    ticks:  { color: 'rgba(254,252,250,0.45)', font: { family: 'Roboto', size: tickPx }, padding: 12, callback: v => fmtPrice(v) },
     border: { display: false },
   };
   if (yMax !== null) yScale.max = yMax;
@@ -763,8 +840,8 @@ function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
           borderWidth: 1,
           titleColor: '#FEFCFA',
           bodyColor: 'rgba(254,252,250,0.75)',
-          titleFont: { family: 'Roboto Slab', size: 23 },
-          bodyFont: { family: 'Roboto', size: 23 },
+          titleFont: { family: 'Roboto Slab', size: tickPx },
+          bodyFont: { family: 'Roboto', size: tickPx },
           padding: 12,
           callbacks: {
             title: items => {
@@ -791,7 +868,7 @@ function createChart(canvasId, datasets, fmtPrice, { yMax = null } = {}) {
           grid: { display: false },
           ticks:  {
             color: 'rgba(254,252,250,0.45)',
-            font: { family: 'Roboto', size: 23 },
+            font: { family: 'Roboto', size: tickPx },
             maxRotation: 0,
             padding: 12,
             // Year labels are drawn by the januaryMarkers plugin; suppress the
