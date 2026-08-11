@@ -60,6 +60,16 @@ def add_months(d: date, n: int) -> date:
     return date(d.year + m // 12, m % 12 + 1, 1)
 
 
+def quarter_floor(d: date) -> date:
+    """Round down to the start of the calendar quarter (Jan/Apr/Jul/Oct 1) — mirrors
+    quarterFloor() in index.html. The chart's x-axis start is always quarter-floored
+    for clean gridlines, so the EIA fetch window has to be too, or the axis extends
+    past where the spot-history data actually begins (up to a ~2-month visible gap).
+    """
+    q_month = ((d.month - 1) // 3) * 3 + 1
+    return date(d.year, q_month, 1)
+
+
 def prev_trading_day(d: date) -> date:
     """The trading day before d — skips Sat/Sun so Monday's 'yesterday' is Friday
     (not the calendar day before, which would be Sunday). Holidays aren't tracked,
@@ -78,7 +88,7 @@ def make_ticker(prefix: str, yr: int, mo: int, exch: str = '.NYM') -> str:
 # ── EIA Spot History ──────────────────────────────────────────────────────────
 
 def eia_spot(series: str, route: str, frequency: str = 'weekly') -> list[dict]:
-    start = add_months(date.today(), -MONTHS_HISTORY).strftime('%Y-%m-%d')
+    start = quarter_floor(add_months(date.today(), -MONTHS_HISTORY)).strftime('%Y-%m-%d')
     try:
         r = requests.get(
             f'https://api.eia.gov/v2/{route}/data/',
