@@ -1,35 +1,35 @@
 {
-  "generated_at": "2026-08-19T05:35:19.132949+00:00",
+  "generated_at": "2026-08-19T06:00:17.246902+00:00",
   "wti": {
     "date": "2026-08-19",
     "data": [
       {
         "delivery": "2026-09",
-        "price": 85.52
+        "price": 85.67
       },
       {
         "delivery": "2026-10",
-        "price": 84.65
+        "price": 84.72
       },
       {
         "delivery": "2026-11",
-        "price": 83.29
+        "price": 83.4
       },
       {
         "delivery": "2026-12",
-        "price": 81.76
+        "price": 81.79
       },
       {
         "delivery": "2027-01",
-        "price": 80.26
+        "price": 80.3
       },
       {
         "delivery": "2027-02",
-        "price": 78.86
+        "price": 78.92
       },
       {
         "delivery": "2027-03",
-        "price": 77.68
+        "price": 77.75
       },
       {
         "delivery": "2027-04",
@@ -41,7 +41,7 @@
       },
       {
         "delivery": "2027-06",
-        "price": 75.09
+        "price": 75.21
       },
       {
         "delivery": "2027-07",
@@ -65,7 +65,7 @@
       },
       {
         "delivery": "2027-12",
-        "price": 72.34
+        "price": 72.4
       },
       {
         "delivery": "2028-01",
@@ -113,7 +113,7 @@
       },
       {
         "delivery": "2028-12",
-        "price": 69.22
+        "price": 69.31
       },
       {
         "delivery": "2029-01",
@@ -150,19 +150,19 @@
     "data": [
       {
         "delivery": "2026-09",
-        "price": 2.783
+        "price": 2.786
       },
       {
         "delivery": "2026-10",
-        "price": 2.811
+        "price": 2.814
       },
       {
         "delivery": "2026-11",
-        "price": 2.997
+        "price": 3.0
       },
       {
         "delivery": "2026-12",
-        "price": 3.553
+        "price": 3.557
       },
       {
         "delivery": "2027-01",
@@ -174,7 +174,7 @@
       },
       {
         "delivery": "2027-03",
-        "price": 2.93
+        "price": 2.932
       },
       {
         "delivery": "2027-04",
