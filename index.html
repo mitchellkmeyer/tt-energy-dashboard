@@ -192,6 +192,14 @@
 
     .ticker.empty { opacity: 0; }   /* hide box until first quote loads */
 
+    /* Forces BOTH ticker boxes onto their own line together, toggled by JS
+       (updateTitleLayout() measures the Henry Hub row, since "Henry Hub
+       $/MMBtu" is always the tighter of the two) — never left to each panel
+       wrapping independently based on its own title length, which let WTI's
+       shorter title stay inline while Henry Hub's had already wrapped. */
+    body.stack-tickers .chart-title { flex-wrap: wrap; gap: 6px 16px; }
+    body.stack-tickers .ticker-wrap { flex-basis: 100%; }
+
     .canvas-wrap {
       flex: 1;
       min-height: 0;
@@ -303,13 +311,8 @@
       .charts { gap: 12px; }
       .chart-panel { padding: 12px 16px 10px; }
 
-      /* Same fix mobile already uses: the ticker box won't compress below its
-         own content size, so let it drop to its own line under the title
-         instead of the two fighting over one row (which was forcing the
-         title's flex item to near-zero width and wrapping into the ticker). */
-      .chart-title { font-size: 1.9rem; flex-wrap: wrap; gap: 6px 12px; }
+      .chart-title { font-size: 1.9rem; }
       .chart-unit  { font-size: 1.3rem; }
-      .ticker-wrap { flex-shrink: 0; }
 
       .ticker        { padding: 3px 11px; gap: 10px; }
       .ticker-spark  { width: 58px; height: 30px; }
@@ -448,10 +451,10 @@
     </div>
     <div class="canvas-wrap"><canvas id="wti-chart"></canvas></div>
   </div>
-  <div class="chart-panel">
+  <div class="chart-panel" id="hh-panel">
     <div class="chart-title">
       <span class="chart-title-left">
-        Henry Hub
+        <span id="hh-label">Henry Hub</span>
         <span class="chart-unit">$/MMBtu</span>
       </span>
       <span class="ticker-wrap">
@@ -670,8 +673,50 @@ function applyChartFontScale() {
 let _fontScaleResizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(_fontScaleResizeTimer);
-  _fontScaleResizeTimer = setTimeout(applyChartFontScale, 150);
+  _fontScaleResizeTimer = setTimeout(() => {
+    applyChartFontScale();
+    updateTitleLayout();
+  }, 150);
 });
+
+// ── Synchronized "Henry Hub" abbreviation + ticker stacking ─────────────────
+// The two chart-title rows used to wrap their ticker box onto a new line
+// independently, based on each row's OWN content width. "Henry Hub $/MMBtu"
+// is longer than "WTI $/bbl", so Henry Hub would wrap first while WTI stayed
+// inline on the same row — inconsistent side by side. Henry Hub is always the
+// tighter row, so ITS fit state now drives both panels via a shared body
+// class, and its label abbreviates to "HH" before either ticker gets stacked.
+const hhLabelEl = document.getElementById('hh-label');
+
+// Flexbox never truly "overflows" a row while children can still shrink (they
+// just get squeezed, e.g. text wrapping mid-word) — so to detect "doesn't
+// really fit", temporarily remove the title's own shrink allowance (the
+// ticker box already has flex-shrink:0) and check for real overflow at each
+// side's natural width.
+function rowOverflows(title) {
+  const left = title.querySelector('.chart-title-left');
+  const prevShrink = left.style.flexShrink;
+  left.style.flexShrink = '0';
+  const overflows = title.scrollWidth > title.clientWidth + 0.5;
+  left.style.flexShrink = prevShrink;
+  return overflows;
+}
+
+function updateTitleLayout() {
+  const hhTitle = document.querySelector('#hh-panel .chart-title');
+  if (!hhTitle) return;
+
+  document.body.classList.remove('stack-tickers');
+  if (hhLabelEl) hhLabelEl.textContent = 'Henry Hub';
+  if (!rowOverflows(hhTitle)) return;                   // full label fits inline
+
+  if (hhLabelEl) hhLabelEl.textContent = 'HH';
+  if (!rowOverflows(hhTitle)) return;                   // abbreviated label fits inline
+
+  if (hhLabelEl) hhLabelEl.textContent = 'Henry Hub';   // too tight either way — restore
+  document.body.classList.add('stack-tickers');         // the full label and stack both
+}
+updateTitleLayout();
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getSpotAtDate(spotHistory, dateStr) {
@@ -1014,6 +1059,7 @@ function applyLive(live) {
   updateTicker('hh',  live.hh);
   updateDot(wtiChart, live.wti ? live.wti.price : null);
   updateDot(hhChart,  live.hh  ? live.hh.price  : null);
+  updateTitleLayout();   // ticker text width just changed — re-check the fit
 }
 
 // Overlay the live intraday forward curve onto the ivory "today" line. Replaces
