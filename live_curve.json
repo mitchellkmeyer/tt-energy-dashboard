@@ -1,47 +1,47 @@
 {
-  "generated_at": "2026-08-26T11:25:16.277134+00:00",
+  "generated_at": "2026-08-26T11:50:12.939312+00:00",
   "wti": {
     "date": "2026-08-26",
     "data": [
       {
         "delivery": "2026-10",
-        "price": 80.17
+        "price": 80.36
       },
       {
         "delivery": "2026-11",
-        "price": 79.08
+        "price": 79.24
       },
       {
         "delivery": "2026-12",
-        "price": 77.59
+        "price": 77.77
       },
       {
         "delivery": "2027-01",
-        "price": 76.27
+        "price": 76.42
       },
       {
         "delivery": "2027-02",
-        "price": 75.09
+        "price": 75.17
       },
       {
         "delivery": "2027-03",
-        "price": 74.21
+        "price": 74.18
       },
       {
         "delivery": "2027-04",
-        "price": 73.34
+        "price": 73.47
       },
       {
         "delivery": "2027-05",
-        "price": 72.67
+        "price": 72.77
       },
       {
         "delivery": "2027-06",
-        "price": 72.17
+        "price": 72.24
       },
       {
         "delivery": "2027-07",
-        "price": 71.72
+        "price": 71.83
       },
       {
         "delivery": "2027-08",
@@ -61,7 +61,7 @@
       },
       {
         "delivery": "2027-12",
-        "price": 70.11
+        "price": 70.19
       },
       {
         "delivery": "2028-01",
@@ -146,75 +146,75 @@
     "data": [
       {
         "delivery": "2026-09",
-        "price": 2.838
+        "price": 2.852
       },
       {
         "delivery": "2026-10",
-        "price": 2.892
+        "price": 2.896
       },
       {
         "delivery": "2026-11",
-        "price": 3.045
+        "price": 3.049
       },
       {
         "delivery": "2026-12",
-        "price": 3.556
-      },
-      {
-        "delivery": "2027-01",
-        "price": 3.957
-      },
-      {
-        "delivery": "2027-02",
-        "price": 3.618
-      },
-      {
-        "delivery": "2027-03",
-        "price": 2.951
-      },
-      {
-        "delivery": "2027-04",
-        "price": 2.812
-      },
-      {
-        "delivery": "2027-05",
-        "price": 2.824
-      },
-      {
-        "delivery": "2027-06",
-        "price": 2.961
-      },
-      {
-        "delivery": "2027-07",
-        "price": 3.167
-      },
-      {
-        "delivery": "2027-08",
-        "price": 3.233
-      },
-      {
-        "delivery": "2027-09",
-        "price": 3.218
-      },
-      {
-        "delivery": "2027-10",
-        "price": 3.298
-      },
-      {
-        "delivery": "2027-11",
         "price": 3.559
       },
       {
+        "delivery": "2027-01",
+        "price": 3.961
+      },
+      {
+        "delivery": "2027-02",
+        "price": 3.623
+      },
+      {
+        "delivery": "2027-03",
+        "price": 2.954
+      },
+      {
+        "delivery": "2027-04",
+        "price": 2.816
+      },
+      {
+        "delivery": "2027-05",
+        "price": 2.827
+      },
+      {
+        "delivery": "2027-06",
+        "price": 2.966
+      },
+      {
+        "delivery": "2027-07",
+        "price": 3.17
+      },
+      {
+        "delivery": "2027-08",
+        "price": 3.239
+      },
+      {
+        "delivery": "2027-09",
+        "price": 3.223
+      },
+      {
+        "delivery": "2027-10",
+        "price": 3.3
+      },
+      {
+        "delivery": "2027-11",
+        "price": 3.563
+      },
+      {
         "delivery": "2027-12",
-        "price": 4.205
+        "price": 4.21
       },
       {
         "delivery": "2028-01",
-        "price": 4.661
+        "price": 4.659
       },
       {
         "delivery": "2028-02",
-        "price": 4.218
+        "price": 4.217
       },
       {
         "delivery": "2028-03",
@@ -226,7 +226,7 @@
       },
       {
         "delivery": "2028-05",
-        "price": 3.177
+        "price": 3.182
       },
       {
         "delivery": "2028-06",
@@ -262,7 +262,7 @@
       },
       {
         "delivery": "2029-02",
-        "price": 4.336
+        "price": 4.34
       },
       {
         "delivery": "2029-03",
