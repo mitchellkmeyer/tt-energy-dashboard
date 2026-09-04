@@ -1,20 +1,20 @@
 {
-  "generated_at": "2026-09-04T04:00:15.096030+00:00",
+  "generated_at": "2026-09-04T04:05:12.502881+00:00",
   "wti": {
-    "price": 91.92,
+    "price": 92.0,
     "prev_close": 91.01,
-    "change": 0.91,
-    "pct": 1.0,
-    "market_time": "2026-09-03T23:50:05-04:00",
+    "change": 0.99,
+    "pct": 1.09,
+    "market_time": "2026-09-03T23:55:02-04:00",
     "spark": [],
     "source": "yahoo"
   },
   "hh": {
-    "price": 2.924,
+    "price": 2.921,
     "prev_close": 2.956,
-    "change": -0.032,
-    "pct": -1.08,
-    "market_time": "2026-09-03T23:50:10-04:00",
+    "change": -0.035,
+    "pct": -1.18,
+    "market_time": "2026-09-03T23:54:52-04:00",
     "spark": [],
     "source": "yahoo"
   }
