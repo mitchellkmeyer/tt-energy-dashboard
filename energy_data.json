@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-17T19:53:06.563914-04:00",
+  "generated_at": "2026-09-18T19:51:13.271712-04:00",
   "wti": {
     "spot_history": [
       {
@@ -361,6 +361,151 @@
     ],
     "curves": {
       "today": {
+        "date": "2026-09-18",
+        "data": [
+          {
+            "delivery": "2026-10",
+            "price": 99.53
+          },
+          {
+            "delivery": "2026-11",
+            "price": 95.47
+          },
+          {
+            "delivery": "2026-12",
+            "price": 91.57
+          },
+          {
+            "delivery": "2027-01",
+            "price": 88.43
+          },
+          {
+            "delivery": "2027-02",
+            "price": 85.76
+          },
+          {
+            "delivery": "2027-03",
+            "price": 83.55
+          },
+          {
+            "delivery": "2027-04",
+            "price": 81.54
+          },
+          {
+            "delivery": "2027-05",
+            "price": 79.96
+          },
+          {
+            "delivery": "2027-06",
+            "price": 78.6
+          },
+          {
+            "delivery": "2027-07",
+            "price": 77.43
+          },
+          {
+            "delivery": "2027-08",
+            "price": 76.4
+          },
+          {
+            "delivery": "2027-09",
+            "price": 75.32
+          },
+          {
+            "delivery": "2027-10",
+            "price": 74.58
+          },
+          {
+            "delivery": "2027-11",
+            "price": 73.95
+          },
+          {
+            "delivery": "2027-12",
+            "price": 73.52
+          },
+          {
+            "delivery": "2028-01",
+            "price": 72.24
+          },
+          {
+            "delivery": "2028-02",
+            "price": 71.77
+          },
+          {
+            "delivery": "2028-03",
+            "price": 71.37
+          },
+          {
+            "delivery": "2028-04",
+            "price": 71.0
+          },
+          {
+            "delivery": "2028-05",
+            "price": 70.67
+          },
+          {
+            "delivery": "2028-06",
+            "price": 71.02
+          },
+          {
+            "delivery": "2028-07",
+            "price": 70.01
+          },
+          {
+            "delivery": "2028-08",
+            "price": 69.7
+          },
+          {
+            "delivery": "2028-09",
+            "price": 69.4
+          },
+          {
+            "delivery": "2028-10",
+            "price": 69.12
+          },
+          {
+            "delivery": "2028-11",
+            "price": 68.87
+          },
+          {
+            "delivery": "2028-12",
+            "price": 69.12
+          },
+          {
+            "delivery": "2029-01",
+            "price": 68.34
+          },
+          {
+            "delivery": "2029-02",
+            "price": 68.07
+          },
+          {
+            "delivery": "2029-03",
+            "price": 67.8
+          },
+          {
+            "delivery": "2029-04",
+            "price": 67.55
+          },
+          {
+            "delivery": "2029-05",
+            "price": 67.33
+          },
+          {
+            "delivery": "2029-06",
+            "price": 67.6
+          },
+          {
+            "delivery": "2029-07",
+            "price": 66.82
+          },
+          {
+            "delivery": "2029-08",
+            "price": 66.57
+          }
+        ]
+      },
+      "1d": {
         "date": "2026-09-17",
         "data": [
           {
@@ -505,374 +650,80 @@
           }
         ]
       },
-      "1d": {
-        "date": "2026-09-16",
-        "data": [
-          {
-            "delivery": "2026-10",
-            "price": 101.72
-          },
-          {
-            "delivery": "2026-11",
-            "price": 97.01
-          },
-          {
-            "delivery": "2026-12",
-            "price": 92.35
-          },
-          {
-            "delivery": "2027-01",
-            "price": 88.53
-          },
-          {
-            "delivery": "2027-02",
-            "price": 85.45
-          },
-          {
-            "delivery": "2027-03",
-            "price": 82.91
-          },
-          {
-            "delivery": "2027-04",
-            "price": 80.88
-          },
-          {
-            "delivery": "2027-05",
-            "price": 79.3
-          },
-          {
-            "delivery": "2027-06",
-            "price": 77.65
-          },
-          {
-            "delivery": "2027-07",
-            "price": 76.38
-          },
-          {
-            "delivery": "2027-08",
-            "price": 75.38
-          },
-          {
-            "delivery": "2027-09",
-            "price": 74.42
-          },
-          {
-            "delivery": "2027-10",
-            "price": 73.41
-          },
-          {
-            "delivery": "2027-11",
-            "price": 72.94
-          },
-          {
-            "delivery": "2027-12",
-            "price": 72.5
-          },
-          {
-            "delivery": "2028-01",
-            "price": 72.17
-          },
-          {
-            "delivery": "2028-02",
-            "price": 71.6
-          },
-          {
-            "delivery": "2028-03",
-            "price": 71.2
-          },
-          {
-            "delivery": "2028-04",
-            "price": 70.79
-          },
-          {
-            "delivery": "2028-05",
-            "price": 70.44
-          },
-          {
-            "delivery": "2028-06",
-            "price": 70.21
-          },
-          {
-            "delivery": "2028-07",
-            "price": 69.78
-          },
-          {
-            "delivery": "2028-08",
-            "price": 69.44
-          },
-          {
-            "delivery": "2028-09",
-            "price": 69.01
-          },
-          {
-            "delivery": "2028-10",
-            "price": 68.81
-          },
-          {
-            "delivery": "2028-11",
-            "price": 68.54
-          },
-          {
-            "delivery": "2028-12",
-            "price": 68.43
-          },
-          {
-            "delivery": "2029-01",
-            "price": 68.0
-          },
-          {
-            "delivery": "2029-02",
-            "price": 67.71
-          },
-          {
-            "delivery": "2029-03",
-            "price": 67.43
-          },
-          {
-            "delivery": "2029-04",
-            "price": 67.17
-          },
-          {
-            "delivery": "2029-05",
-            "price": 66.92
-          },
-          {
-            "delivery": "2029-06",
-            "price": 66.78
-          },
-          {
-            "delivery": "2029-07",
-            "price": 66.37
-          },
-          {
-            "delivery": "2029-08",
-            "price": 66.1
-          }
-        ]
-      },
       "7d": {
-        "date": "2026-09-10",
+        "date": "2026-09-11",
         "data": [
           {
             "delivery": "2026-10",
-            "price": 103.82
+            "price": 99.99
           },
           {
             "delivery": "2026-11",
-            "price": 99.37
+            "price": 95.86
           },
           {
             "delivery": "2026-12",
-            "price": 94.52
+            "price": 91.45
           },
           {
             "delivery": "2027-01",
-            "price": 90.23
+            "price": 87.64
           },
           {
             "delivery": "2027-02",
-            "price": 86.5
+            "price": 84.51
           },
           {
             "delivery": "2027-03",
-            "price": 83.66
+            "price": 82.13
           },
           {
             "delivery": "2027-04",
-            "price": 80.89
+            "price": 80.05
           },
           {
             "delivery": "2027-05",
-            "price": 78.69
+            "price": 78.22
           },
           {
             "delivery": "2027-06",
-            "price": 76.97
+            "price": 76.74
           },
           {
             "delivery": "2027-07",
-            "price": 75.57
+            "price": 75.49
           },
           {
             "delivery": "2027-08",
-            "price": 74.34
+            "price": 74.52
           },
           {
             "delivery": "2027-09",
-            "price": 73.25
+            "price": 73.7
           },
           {
             "delivery": "2027-10",
-            "price": 72.57
+            "price": 73.16
           },
           {
             "delivery": "2027-11",
-            "price": 72.16
+            "price": 72.27
           },
           {
             "delivery": "2027-12",
-            "price": 71.55
+            "price": 72.08
           },
           {
             "delivery": "2028-01",
-            "price": 71.75
+            "price": 71.56
           },
           {
             "delivery": "2028-02",
-            "price": 70.78
+            "price": 71.31
           },
           {
             "delivery": "2028-03",
-            "price": 70.44
-          },
-          {
-            "delivery": "2028-04",
-            "price": 70.24
-          },
-          {
-            "delivery": "2028-05",
-            "price": 69.97
-          },
-          {
-            "delivery": "2028-06",
-            "price": 69.54
-          },
-          {
-            "delivery": "2028-07",
-            "price": 69.46
-          },
-          {
-            "delivery": "2028-08",
-            "price": 69.19
-          },
-          {
-            "delivery": "2028-09",
-            "price": 68.95
-          },
-          {
-            "delivery": "2028-10",
-            "price": 68.71
-          },
-          {
-            "delivery": "2028-11",
-            "price": 68.5
-          },
-          {
-            "delivery": "2028-12",
-            "price": 68.1
-          },
-          {
-            "delivery": "2029-01",
-            "price": 68.04
-          },
-          {
-            "delivery": "2029-02",
-            "price": 67.8
-          },
-          {
-            "delivery": "2029-03",
-            "price": 67.59
-          },
-          {
-            "delivery": "2029-04",
-            "price": 67.6
-          },
-          {
-            "delivery": "2029-05",
-            "price": 67.42
-          },
-          {
-            "delivery": "2029-06",
-            "price": 66.99
-          },
-          {
-            "delivery": "2029-07",
-            "price": 66.82
-          },
-          {
-            "delivery": "2029-08",
-            "price": 66.62
-          }
-        ]
-      },
-      "1mo": {
-        "date": "2026-08-18",
-        "data": [
-          {
-            "delivery": "2026-09",
-            "price": 85.42
-          },
-          {
-            "delivery": "2026-10",
-            "price": 84.54
-          },
-          {
-            "delivery": "2026-11",
-            "price": 83.13
-          },
-          {
-            "delivery": "2026-12",
-            "price": 81.56
-          },
-          {
-            "delivery": "2027-01",
-            "price": 80.0
-          },
-          {
-            "delivery": "2027-02",
-            "price": 78.62
-          },
-          {
-            "delivery": "2027-03",
-            "price": 77.43
-          },
-          {
-            "delivery": "2027-04",
-            "price": 76.45
-          },
-          {
-            "delivery": "2027-05",
-            "price": 75.5
-          },
-          {
-            "delivery": "2027-06",
-            "price": 74.93
-          },
-          {
-            "delivery": "2027-07",
-            "price": 74.08
-          },
-          {
-            "delivery": "2027-08",
-            "price": 73.65
-          },
-          {
-            "delivery": "2027-09",
-            "price": 73.13
-          },
-          {
-            "delivery": "2027-10",
-            "price": 72.71
-          },
-          {
-            "delivery": "2027-11",
-            "price": 72.33
-          },
-          {
-            "delivery": "2027-12",
-            "price": 72.17
-          },
-          {
-            "delivery": "2028-01",
-            "price": 71.64
-          },
-          {
-            "delivery": "2028-02",
-            "price": 71.19
-          },
-          {
-            "delivery": "2028-03",
-            "price": 71.12
+            "price": 70.91
           },
           {
             "delivery": "2028-04",
@@ -880,51 +731,200 @@
           },
           {
             "delivery": "2028-05",
-            "price": 70.77
+            "price": 70.35
           },
           {
             "delivery": "2028-06",
-            "price": 70.3
+            "price": 70.06
           },
           {
             "delivery": "2028-07",
-            "price": 69.91
+            "price": 69.79
           },
           {
             "delivery": "2028-08",
-            "price": 69.67
+            "price": 69.5
           },
           {
             "delivery": "2028-09",
-            "price": 69.47
+            "price": 69.23
           },
           {
             "delivery": "2028-10",
-            "price": 69.27
+            "price": 68.97
           },
           {
             "delivery": "2028-11",
-            "price": 69.1
+            "price": 68.75
           },
           {
             "delivery": "2028-12",
-            "price": 69.05
+            "price": 68.57
           },
           {
             "delivery": "2029-01",
-            "price": 68.72
+            "price": 68.28
           },
           {
             "delivery": "2029-02",
-            "price": 68.51
+            "price": 68.02
           },
           {
             "delivery": "2029-03",
-            "price": 68.32
+            "price": 67.79
+          },
+          {
+            "delivery": "2029-04",
+            "price": 67.58
           },
           {
             "delivery": "2029-05",
-            "price": 67.97
+            "price": 67.38
+          },
+          {
+            "delivery": "2029-06",
+            "price": 67.06
+          },
+          {
+            "delivery": "2029-07",
+            "price": 66.98
+          },
+          {
+            "delivery": "2029-08",
+            "price": 66.77
+          }
+        ]
+      },
+      "1mo": {
+        "date": "2026-08-19",
+        "data": [
+          {
+            "delivery": "2026-09",
+            "price": 85.75
+          },
+          {
+            "delivery": "2026-10",
+            "price": 84.38
+          },
+          {
+            "delivery": "2026-11",
+            "price": 82.72
+          },
+          {
+            "delivery": "2026-12",
+            "price": 80.96
+          },
+          {
+            "delivery": "2027-01",
+            "price": 79.33
+          },
+          {
+            "delivery": "2027-02",
+            "price": 77.89
+          },
+          {
+            "delivery": "2027-03",
+            "price": 76.71
+          },
+          {
+            "delivery": "2027-04",
+            "price": 75.7
+          },
+          {
+            "delivery": "2027-05",
+            "price": 74.96
+          },
+          {
+            "delivery": "2027-06",
+            "price": 74.21
+          },
+          {
+            "delivery": "2027-07",
+            "price": 73.6
+          },
+          {
+            "delivery": "2027-08",
+            "price": 73.11
+          },
+          {
+            "delivery": "2027-09",
+            "price": 72.72
+          },
+          {
+            "delivery": "2027-10",
+            "price": 72.24
+          },
+          {
+            "delivery": "2027-11",
+            "price": 72.37
+          },
+          {
+            "delivery": "2027-12",
+            "price": 71.53
+          },
+          {
+            "delivery": "2028-01",
+            "price": 71.34
+          },
+          {
+            "delivery": "2028-02",
+            "price": 71.22
+          },
+          {
+            "delivery": "2028-03",
+            "price": 71.05
+          },
+          {
+            "delivery": "2028-04",
+            "price": 70.76
+          },
+          {
+            "delivery": "2028-05",
+            "price": 70.52
+          },
+          {
+            "delivery": "2028-06",
+            "price": 69.87
+          },
+          {
+            "delivery": "2028-07",
+            "price": 70.02
+          },
+          {
+            "delivery": "2028-08",
+            "price": 69.77
+          },
+          {
+            "delivery": "2028-09",
+            "price": 69.59
+          },
+          {
+            "delivery": "2028-10",
+            "price": 69.35
+          },
+          {
+            "delivery": "2028-11",
+            "price": 69.16
+          },
+          {
+            "delivery": "2028-12",
+            "price": 68.67
+          },
+          {
+            "delivery": "2029-01",
+            "price": 68.74
+          },
+          {
+            "delivery": "2029-02",
+            "price": 68.52
+          },
+          {
+            "delivery": "2029-03",
+            "price": 68.33
+          },
+          {
+            "delivery": "2029-05",
+            "price": 67.98
           },
           {
             "delivery": "2029-06",
@@ -932,152 +932,152 @@
           },
           {
             "delivery": "2029-07",
-            "price": 67.62
+            "price": 67.6
           },
           {
             "delivery": "2029-08",
-            "price": 67.44
+            "price": 67.41
           }
         ]
       },
       "3mo": {
-        "date": "2026-06-18",
+        "date": "2026-06-19",
         "data": [
           {
             "delivery": "2026-07",
-            "price": 75.91
+            "price": 77.54
           },
           {
             "delivery": "2026-08",
-            "price": 75.23
+            "price": 76.54
           },
           {
             "delivery": "2026-09",
-            "price": 74.38
+            "price": 75.62
           },
           {
             "delivery": "2026-10",
-            "price": 73.45
+            "price": 74.65
           },
           {
             "delivery": "2026-11",
-            "price": 72.56
+            "price": 73.72
           },
           {
             "delivery": "2026-12",
-            "price": 71.77
+            "price": 72.95
           },
           {
             "delivery": "2027-01",
-            "price": 71.16
+            "price": 72.26
           },
           {
             "delivery": "2027-02",
-            "price": 70.58
+            "price": 71.83
           },
           {
             "delivery": "2027-03",
-            "price": 70.43
+            "price": 71.05
           },
           {
             "delivery": "2027-04",
-            "price": 69.9
+            "price": 70.23
           },
           {
             "delivery": "2027-05",
-            "price": 69.7
+            "price": 70.42
           },
           {
             "delivery": "2027-06",
-            "price": 69.15
+            "price": 70.0
           },
           {
             "delivery": "2027-07",
-            "price": 69.22
+            "price": 69.73
           },
           {
             "delivery": "2027-08",
-            "price": 69.01
+            "price": 69.21
           },
           {
             "delivery": "2027-09",
-            "price": 68.82
+            "price": 69.22
           },
           {
             "delivery": "2027-10",
-            "price": 68.62
+            "price": 68.42
           },
           {
             "delivery": "2027-11",
-            "price": 68.98
+            "price": 68.65
           },
           {
             "delivery": "2027-12",
-            "price": 68.03
+            "price": 68.77
           },
           {
             "delivery": "2028-01",
-            "price": 68.12
+            "price": 68.35
           },
           {
             "delivery": "2028-02",
-            "price": 68.51
+            "price": 68.18
           },
           {
             "delivery": "2028-03",
-            "price": 68.36
+            "price": 68.03
           },
           {
             "delivery": "2028-04",
-            "price": 68.22
+            "price": 67.9
           },
           {
             "delivery": "2028-05",
-            "price": 67.06
+            "price": 67.79
           },
           {
             "delivery": "2028-06",
-            "price": 67.59
+            "price": 68.06
           },
           {
             "delivery": "2028-07",
-            "price": 67.86
+            "price": 67.55
           },
           {
             "delivery": "2028-08",
-            "price": 67.7
+            "price": 67.41
           },
           {
             "delivery": "2028-09",
-            "price": 67.58
+            "price": 67.3
           },
           {
             "delivery": "2028-10",
-            "price": 67.48
+            "price": 67.21
           },
           {
             "delivery": "2028-11",
-            "price": 67.38
+            "price": 67.12
           },
           {
             "delivery": "2028-12",
-            "price": 66.8
-          },
-          {
-            "delivery": "2029-01",
             "price": 67.14
           },
           {
+            "delivery": "2029-01",
+            "price": 66.86
+          },
+          {
             "delivery": "2029-02",
-            "price": 67.0
+            "price": 66.74
           },
           {
             "delivery": "2029-05",
-            "price": 66.68
+            "price": 66.46
           },
           {
             "delivery": "2029-06",
-            "price": 66.2
+            "price": 66.36
           }
         ]
       },
@@ -1689,6 +1689,155 @@
     ],
     "curves": {
       "today": {
+        "date": "2026-09-18",
+        "data": [
+          {
+            "delivery": "2026-10",
+            "price": 2.9
+          },
+          {
+            "delivery": "2026-11",
+            "price": 3.03
+          },
+          {
+            "delivery": "2026-12",
+            "price": 3.39
+          },
+          {
+            "delivery": "2027-01",
+            "price": 3.73
+          },
+          {
+            "delivery": "2027-02",
+            "price": 3.43
+          },
+          {
+            "delivery": "2027-03",
+            "price": 2.8
+          },
+          {
+            "delivery": "2027-04",
+            "price": 2.7
+          },
+          {
+            "delivery": "2027-05",
+            "price": 2.74
+          },
+          {
+            "delivery": "2027-06",
+            "price": 2.9
+          },
+          {
+            "delivery": "2027-07",
+            "price": 3.12
+          },
+          {
+            "delivery": "2027-08",
+            "price": 3.2
+          },
+          {
+            "delivery": "2027-09",
+            "price": 3.18
+          },
+          {
+            "delivery": "2027-10",
+            "price": 3.27
+          },
+          {
+            "delivery": "2027-11",
+            "price": 3.56
+          },
+          {
+            "delivery": "2027-12",
+            "price": 4.19
+          },
+          {
+            "delivery": "2028-01",
+            "price": 4.61
+          },
+          {
+            "delivery": "2028-02",
+            "price": 4.2
+          },
+          {
+            "delivery": "2028-03",
+            "price": 3.45
+          },
+          {
+            "delivery": "2028-04",
+            "price": 3.22
+          },
+          {
+            "delivery": "2028-05",
+            "price": 3.22
+          },
+          {
+            "delivery": "2028-06",
+            "price": 3.38
+          },
+          {
+            "delivery": "2028-07",
+            "price": 3.59
+          },
+          {
+            "delivery": "2028-08",
+            "price": 3.65
+          },
+          {
+            "delivery": "2028-09",
+            "price": 3.63
+          },
+          {
+            "delivery": "2028-10",
+            "price": 3.67
+          },
+          {
+            "delivery": "2028-11",
+            "price": 3.84
+          },
+          {
+            "delivery": "2028-12",
+            "price": 4.38
+          },
+          {
+            "delivery": "2029-01",
+            "price": 4.83
+          },
+          {
+            "delivery": "2029-02",
+            "price": 4.36
+          },
+          {
+            "delivery": "2029-03",
+            "price": 3.45
+          },
+          {
+            "delivery": "2029-04",
+            "price": 3.17
+          },
+          {
+            "delivery": "2029-05",
+            "price": 3.15
+          },
+          {
+            "delivery": "2029-06",
+            "price": 3.28
+          },
+          {
+            "delivery": "2029-07",
+            "price": 3.48
+          },
+          {
+            "delivery": "2029-08",
+            "price": 3.55
+          },
+          {
+            "delivery": "2029-09",
+            "price": 3.53
+          }
+        ]
+      },
+      "1d": {
         "date": "2026-09-17",
         "data": [
           {
@@ -1837,40 +1986,40 @@
           }
         ]
       },
-      "1d": {
-        "date": "2026-09-16",
+      "7d": {
+        "date": "2026-09-11",
         "data": [
           {
             "delivery": "2026-10",
-            "price": 2.89
+            "price": 2.82
           },
           {
             "delivery": "2026-11",
-            "price": 3.02
+            "price": 2.97
           },
           {
             "delivery": "2026-12",
-            "price": 3.41
+            "price": 3.46
           },
           {
             "delivery": "2027-01",
-            "price": 3.8
+            "price": 3.88
           },
           {
             "delivery": "2027-02",
-            "price": 3.47
+            "price": 3.54
           },
           {
             "delivery": "2027-03",
-            "price": 2.85
+            "price": 2.89
           },
           {
             "delivery": "2027-04",
-            "price": 2.73
+            "price": 2.76
           },
           {
             "delivery": "2027-05",
-            "price": 2.76
+            "price": 2.77
           },
           {
             "delivery": "2027-06",
@@ -1894,156 +2043,7 @@
           },
           {
             "delivery": "2027-11",
-            "price": 3.58
-          },
-          {
-            "delivery": "2027-12",
-            "price": 4.2
-          },
-          {
-            "delivery": "2028-01",
-            "price": 4.63
-          },
-          {
-            "delivery": "2028-02",
-            "price": 4.21
-          },
-          {
-            "delivery": "2028-03",
-            "price": 3.47
-          },
-          {
-            "delivery": "2028-04",
-            "price": 3.23
-          },
-          {
-            "delivery": "2028-05",
-            "price": 3.23
-          },
-          {
-            "delivery": "2028-06",
-            "price": 3.39
-          },
-          {
-            "delivery": "2028-07",
-            "price": 3.59
-          },
-          {
-            "delivery": "2028-08",
-            "price": 3.66
-          },
-          {
-            "delivery": "2028-09",
-            "price": 3.63
-          },
-          {
-            "delivery": "2028-10",
-            "price": 3.67
-          },
-          {
-            "delivery": "2028-11",
-            "price": 3.85
-          },
-          {
-            "delivery": "2028-12",
-            "price": 4.39
-          },
-          {
-            "delivery": "2029-01",
-            "price": 4.82
-          },
-          {
-            "delivery": "2029-02",
-            "price": 4.36
-          },
-          {
-            "delivery": "2029-03",
-            "price": 3.44
-          },
-          {
-            "delivery": "2029-04",
-            "price": 3.17
-          },
-          {
-            "delivery": "2029-05",
-            "price": 3.15
-          },
-          {
-            "delivery": "2029-06",
-            "price": 3.28
-          },
-          {
-            "delivery": "2029-07",
-            "price": 3.49
-          },
-          {
-            "delivery": "2029-08",
-            "price": 3.55
-          },
-          {
-            "delivery": "2029-09",
-            "price": 3.53
-          }
-        ]
-      },
-      "7d": {
-        "date": "2026-09-10",
-        "data": [
-          {
-            "delivery": "2026-10",
-            "price": 2.84
-          },
-          {
-            "delivery": "2026-11",
-            "price": 2.98
-          },
-          {
-            "delivery": "2026-12",
-            "price": 3.46
-          },
-          {
-            "delivery": "2027-01",
-            "price": 3.88
-          },
-          {
-            "delivery": "2027-02",
-            "price": 3.55
-          },
-          {
-            "delivery": "2027-03",
-            "price": 2.9
-          },
-          {
-            "delivery": "2027-04",
-            "price": 2.77
-          },
-          {
-            "delivery": "2027-05",
-            "price": 2.79
-          },
-          {
-            "delivery": "2027-06",
-            "price": 2.94
-          },
-          {
-            "delivery": "2027-07",
-            "price": 3.15
-          },
-          {
-            "delivery": "2027-08",
-            "price": 3.22
-          },
-          {
-            "delivery": "2027-09",
-            "price": 3.2
-          },
-          {
-            "delivery": "2027-10",
-            "price": 3.29
-          },
-          {
-            "delivery": "2027-11",
-            "price": 3.57
+            "price": 3.56
           },
           {
             "delivery": "2027-12",
@@ -2055,15 +2055,15 @@
           },
           {
             "delivery": "2028-02",
-            "price": 4.22
+            "price": 4.21
           },
           {
             "delivery": "2028-03",
-            "price": 3.48
+            "price": 3.47
           },
           {
             "delivery": "2028-04",
-            "price": 3.23
+            "price": 3.22
           },
           {
             "delivery": "2028-05",
@@ -2083,11 +2083,11 @@
           },
           {
             "delivery": "2028-09",
-            "price": 3.61
+            "price": 3.62
           },
           {
             "delivery": "2028-10",
-            "price": 3.65
+            "price": 3.66
           },
           {
             "delivery": "2028-11",
@@ -2095,7 +2095,7 @@
           },
           {
             "delivery": "2028-12",
-            "price": 4.37
+            "price": 4.39
           },
           {
             "delivery": "2029-01",
@@ -2107,11 +2107,11 @@
           },
           {
             "delivery": "2029-03",
-            "price": 3.41
+            "price": 3.44
           },
           {
             "delivery": "2029-04",
-            "price": 3.13
+            "price": 3.14
           },
           {
             "delivery": "2029-05",
@@ -2119,84 +2119,84 @@
           },
           {
             "delivery": "2029-06",
-            "price": 3.24
+            "price": 3.25
           },
           {
             "delivery": "2029-07",
-            "price": 3.45
+            "price": 3.46
           },
           {
             "delivery": "2029-08",
-            "price": 3.51
+            "price": 3.52
           },
           {
             "delivery": "2029-09",
-            "price": 3.49
+            "price": 3.5
           }
         ]
       },
       "1mo": {
-        "date": "2026-08-18",
+        "date": "2026-08-19",
         "data": [
           {
             "delivery": "2026-09",
-            "price": 2.79
+            "price": 2.78
           },
           {
             "delivery": "2026-10",
-            "price": 2.82
+            "price": 2.79
           },
           {
             "delivery": "2026-11",
-            "price": 3.01
-          },
-          {
-            "delivery": "2026-12",
-            "price": 3.57
-          },
-          {
-            "delivery": "2027-01",
-            "price": 3.98
-          },
-          {
-            "delivery": "2027-02",
-            "price": 3.65
-          },
-          {
-            "delivery": "2027-03",
-            "price": 2.93
-          },
-          {
-            "delivery": "2027-04",
-            "price": 2.81
-          },
-          {
-            "delivery": "2027-05",
-            "price": 2.82
-          },
-          {
-            "delivery": "2027-06",
             "price": 2.96
           },
           {
+            "delivery": "2026-12",
+            "price": 3.52
+          },
+          {
+            "delivery": "2027-01",
+            "price": 3.93
+          },
+          {
+            "delivery": "2027-02",
+            "price": 3.6
+          },
+          {
+            "delivery": "2027-03",
+            "price": 2.92
+          },
+          {
+            "delivery": "2027-04",
+            "price": 2.79
+          },
+          {
+            "delivery": "2027-05",
+            "price": 2.8
+          },
+          {
+            "delivery": "2027-06",
+            "price": 2.94
+          },
+          {
             "delivery": "2027-07",
-            "price": 3.16
+            "price": 3.14
           },
           {
             "delivery": "2027-08",
-            "price": 3.23
-          },
-          {
-            "delivery": "2027-09",
             "price": 3.21
           },
           {
+            "delivery": "2027-09",
+            "price": 3.19
+          },
+          {
             "delivery": "2027-10",
-            "price": 3.29
+            "price": 3.27
           },
           {
             "delivery": "2027-11",
-            "price": 3.54
+            "price": 3.53
           },
           {
             "delivery": "2027-12",
@@ -2216,11 +2216,11 @@
           },
           {
             "delivery": "2028-04",
-            "price": 3.17
+            "price": 3.16
           },
           {
             "delivery": "2028-05",
-            "price": 3.16
+            "price": 3.15
           },
           {
             "delivery": "2028-06",
@@ -2228,15 +2228,15 @@
           },
           {
             "delivery": "2028-07",
-            "price": 3.49
+            "price": 3.5
           },
           {
             "delivery": "2028-08",
-            "price": 3.54
+            "price": 3.57
           },
           {
             "delivery": "2028-09",
-            "price": 3.53
+            "price": 3.54
           },
           {
             "delivery": "2028-10",
@@ -2244,31 +2244,31 @@
           },
           {
             "delivery": "2028-11",
-            "price": 3.74
+            "price": 3.75
           },
           {
             "delivery": "2028-12",
-            "price": 4.34
+            "price": 4.32
           },
           {
             "delivery": "2029-01",
-            "price": 4.76
+            "price": 4.77
           },
           {
             "delivery": "2029-02",
-            "price": 4.33
+            "price": 4.34
           },
           {
             "delivery": "2029-03",
-            "price": 3.43
+            "price": 3.45
           },
           {
             "delivery": "2029-04",
-            "price": 3.14
+            "price": 3.15
           },
           {
             "delivery": "2029-05",
-            "price": 3.14
+            "price": 3.13
           },
           {
             "delivery": "2029-06",
@@ -2280,40 +2280,40 @@
           },
           {
             "delivery": "2029-08",
-            "price": 3.53
+            "price": 3.52
           }
         ]
       },
       "3mo": {
-        "date": "2026-06-18",
+        "date": "2026-06-19",
         "data": [
           {
             "delivery": "2026-07",
-            "price": 3.21
+            "price": 3.2
           },
           {
             "delivery": "2026-08",
-            "price": 3.26
-          },
-          {
-            "delivery": "2026-09",
-            "price": 3.22
-          },
-          {
-            "delivery": "2026-10",
             "price": 3.25
           },
           {
+            "delivery": "2026-09",
+            "price": 3.21
+          },
+          {
+            "delivery": "2026-10",
+            "price": 3.24
+          },
+          {
             "delivery": "2026-11",
-            "price": 3.44
+            "price": 3.43
           },
           {
             "delivery": "2026-12",
-            "price": 4.06
+            "price": 4.05
           },
           {
             "delivery": "2027-01",
-            "price": 4.46
+            "price": 4.45
           },
           {
             "delivery": "2027-02",
@@ -2325,23 +2325,23 @@
           },
           {
             "delivery": "2027-04",
-            "price": 2.98
+            "price": 2.97
           },
           {
             "delivery": "2027-05",
-            "price": 2.95
+            "price": 2.96
           },
           {
             "delivery": "2027-06",
-            "price": 3.09
+            "price": 3.1
           },
           {
             "delivery": "2027-07",
-            "price": 3.3
+            "price": 3.31
           },
           {
             "delivery": "2027-08",
-            "price": 3.36
+            "price": 3.37
           },
           {
             "delivery": "2027-09",
@@ -2349,15 +2349,15 @@
           },
           {
             "delivery": "2027-10",
-            "price": 3.41
+            "price": 3.42
           },
           {
             "delivery": "2027-11",
-            "price": 3.66
+            "price": 3.67
           },
           {
             "delivery": "2027-12",
-            "price": 4.31
+            "price": 4.32
           },
           {
             "delivery": "2028-01",
@@ -2365,11 +2365,11 @@
           },
           {
             "delivery": "2028-02",
-            "price": 4.26
+            "price": 4.25
           },
           {
             "delivery": "2028-03",
-            "price": 3.47
+            "price": 3.48
           },
           {
             "delivery": "2028-04",
@@ -2377,59 +2377,59 @@
           },
           {
             "delivery": "2028-05",
-            "price": 3.15
+            "price": 3.14
           },
           {
             "delivery": "2028-06",
-            "price": 3.29
+            "price": 3.28
           },
           {
             "delivery": "2028-07",
-            "price": 3.51
+            "price": 3.49
           },
           {
             "delivery": "2028-08",
-            "price": 3.57
-          },
-          {
-            "delivery": "2028-09",
             "price": 3.55
           },
           {
+            "delivery": "2028-09",
+            "price": 3.53
+          },
+          {
             "delivery": "2028-10",
-            "price": 3.62
+            "price": 3.59
           },
           {
             "delivery": "2028-11",
-            "price": 3.83
+            "price": 3.81
           },
           {
             "delivery": "2028-12",
-            "price": 4.41
+            "price": 4.39
           },
           {
             "delivery": "2029-01",
-            "price": 4.82
+            "price": 4.8
           },
           {
             "delivery": "2029-02",
-            "price": 4.35
+            "price": 4.32
           },
           {
             "delivery": "2029-03",
-            "price": 3.47
+            "price": 3.45
           },
           {
             "delivery": "2029-04",
-            "price": 3.15
+            "price": 3.13
           },
           {
             "delivery": "2029-05",
-            "price": 3.16
+            "price": 3.1
           },
           {
             "delivery": "2029-06",
-            "price": 3.24
+            "price": 3.22
           }
         ]
       },
