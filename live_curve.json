@@ -1,39 +1,39 @@
 {
-  "generated_at": "2026-10-02T02:20:23.296235+00:00",
+  "generated_at": "2026-10-02T02:45:13.915941+00:00",
   "wti": {
     "date": "2026-10-01",
     "data": [
       {
         "delivery": "2026-11",
-        "price": 92.71
+        "price": 92.87
       },
       {
         "delivery": "2026-12",
-        "price": 90.79
+        "price": 90.92
       },
       {
         "delivery": "2027-01",
-        "price": 88.7
+        "price": 88.83
       },
       {
         "delivery": "2027-02",
-        "price": 86.56
+        "price": 86.67
       },
       {
         "delivery": "2027-03",
-        "price": 84.63
+        "price": 84.7
       },
       {
         "delivery": "2027-04",
-        "price": 83.0
+        "price": 83.03
       },
       {
         "delivery": "2027-05",
-        "price": 81.65
+        "price": 81.63
       },
       {
         "delivery": "2027-06",
-        "price": 80.42
+        "price": 80.45
       },
       {
         "delivery": "2027-07",
@@ -57,7 +57,7 @@
       },
       {
         "delivery": "2027-12",
-        "price": 75.28
+        "price": 75.29
       },
       {
         "delivery": "2028-01",
@@ -146,11 +146,11 @@
     "data": [
       {
         "delivery": "2026-11",
-        "price": 2.933
+        "price": 2.932
       },
       {
         "delivery": "2026-12",
-        "price": 3.273
+        "price": 3.272
       },
       {
         "delivery": "2027-01",
@@ -178,7 +178,7 @@
       },
       {
         "delivery": "2027-07",
-        "price": 3.048
+        "price": 3.047
       },
       {
         "delivery": "2027-08",
@@ -210,7 +210,7 @@
       },
       {
         "delivery": "2028-03",
-        "price": 3.398
+        "price": 3.392
       },
       {
         "delivery": "2028-04",
@@ -218,11 +218,11 @@
       },
       {
         "delivery": "2028-05",
-        "price": 3.171
+        "price": 3.16
       },
       {
         "delivery": "2028-06",
-        "price": 3.327
+        "price": 3.314
       },
       {
         "delivery": "2028-07",
