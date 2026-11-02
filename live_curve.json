@@ -1,35 +1,35 @@
 {
-  "generated_at": "2026-11-02T04:25:17.792298+00:00",
+  "generated_at": "2026-11-02T04:50:13.642429+00:00",
   "wti": {
     "date": "2026-11-01",
     "data": [
       {
         "delivery": "2026-12",
-        "price": 100.61
+        "price": 100.88
       },
       {
         "delivery": "2027-01",
-        "price": 98.93
+        "price": 99.18
       },
       {
         "delivery": "2027-02",
-        "price": 96.96
+        "price": 97.19
       },
       {
         "delivery": "2027-03",
-        "price": 94.83
+        "price": 95.05
       },
       {
         "delivery": "2027-04",
-        "price": 92.81
+        "price": 92.98
       },
       {
         "delivery": "2027-05",
-        "price": 90.92
+        "price": 91.08
       },
       {
         "delivery": "2027-06",
-        "price": 89.2
+        "price": 89.33
       },
       {
         "delivery": "2027-07",
@@ -37,7 +37,7 @@
       },
       {
         "delivery": "2027-08",
-        "price": 86.0
+        "price": 85.98
       },
       {
         "delivery": "2027-09",
@@ -53,7 +53,7 @@
       },
       {
         "delivery": "2027-12",
-        "price": 81.01
+        "price": 81.09
       },
       {
         "delivery": "2028-01",
@@ -101,7 +101,7 @@
       },
       {
         "delivery": "2028-12",
-        "price": 73.6
+        "price": 73.62
       },
       {
         "delivery": "2029-01",
@@ -146,19 +146,19 @@
     "data": [
       {
         "delivery": "2026-12",
-        "price": 2.903
+        "price": 2.906
       },
       {
         "delivery": "2027-01",
-        "price": 3.39
+        "price": 3.391
       },
       {
         "delivery": "2027-02",
-        "price": 3.049
+        "price": 3.05
       },
       {
         "delivery": "2027-03",
-        "price": 2.423
+        "price": 2.421
       },
       {
         "delivery": "2027-04",
@@ -182,7 +182,7 @@
       },
       {
         "delivery": "2027-09",
-        "price": 2.902
+        "price": 2.901
       },
       {
         "delivery": "2027-10",
