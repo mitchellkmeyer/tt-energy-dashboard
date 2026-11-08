@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T18:20:13.467456+00:00",
+  "generated_at": "2026-11-08T18:25:11.697033+00:00",
   "wti": {
     "price": 90.83,
     "prev_close": 90.52,
@@ -10,10 +10,10 @@
     "source": "yahoo"
   },
   "hh": {
-    "price": 2.998,
+    "price": 3.533,
     "prev_close": 2.947,
-    "change": 0.051,
-    "pct": 1.73,
+    "change": 0.586,
+    "pct": 19.88,
     "market_time": "2026-10-15T16:59:57-04:00",
     "spark": [],
     "source": "yahoo"
